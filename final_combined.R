@@ -1,450 +1,387 @@
 # ============================================================
-# Physiology t0 → t24 on DMS(P)t, merged into ALL_contrasts
+# ONE-BLOCK PIPELINE (prose TXT only; no LaTeX)
+# Frame = first script (skew/log1p, AIC selection incl. lme+varIdent)
+# Metrics = second script (incl. normalized_df)
+# Inference = Type-III on clean lmer refit; if lmer is SINGULAR → drop RE and use lm
+# Post-hoc = GATED (only if relevant omnibus terms are significant)
+# Output = ONE TXT with transparent prose (assumptions + changes)
 # ============================================================
 
-# --- Working dir (edit if needed) ---
-setwd("C:/Users/fmura/Documents/groningen/Hon Project Arctic Algae/Data/R/csvs_for_chat")
-
-# --- Packages ---
 suppressPackageStartupMessages({
-  library(dplyr); library(tidyr); library(readr); library(ggplot2)
-  library(lme4); library(lmerTest); library(emmeans); library(car)
-  library(broom); library(xtable); library(rlang); library(tibble)
+  library(dplyr); library(tidyr); library(readr); library(stringr); library(purrr)
+  library(lme4); library(nlme); library(emmeans); library(car); library(MuMIn)
+  library(broom); library(e1071)
 })
 
-# Respect the rest of your pipeline if there are conflicts:
-# Use sum-to-zero contrasts only inside this block and restore afterwards.
+# ---------- options, seed & guards ----------
+set.seed(1)  # reproducibility of any stochastic optimizer steps
 .old_contr <- options("contrasts")
 options(contrasts = c("contr.sum","contr.poly"))
 on.exit(do.call(options, .old_contr), add = TRUE)
 
-# --- Safe helpers (defined only if missing) ---
-if (!exists("safe_filename", mode = "function")) {
-  safe_filename <- function(x) {
-    x <- gsub("[^A-Za-z0-9]+", "_", x)
-    x <- gsub("_+$", "", x)
-    tolower(x)
-  }
-}
-if (!exists(".bind_if", mode = "function")) {
-  .bind_if <- function(lst) {
-    lst <- lst[!vapply(lst, function(x) is.null(x) || !nrow(x), logical(1))]
-    if (!length(lst)) return(NULL)
-    dplyr::bind_rows(lst)
-  }
+if (exists("random", envir = .GlobalEnv) && !is.function(get("random", envir = .GlobalEnv))) {
+  try(rm("random", envir = .GlobalEnv), silent = TRUE)
 }
 
-# ALL-contrasts exporters (define light fallbacks if not already present)
-if (!exists("make_family_table_tex_all", mode = "function")) {
-  make_family_table_tex_all <- function(family_list, results, filename, sci_p_below = 1e-3){
-    fmt_num <- function(x, d = 3) ifelse(is.na(x), "", formatC(x, format="f", digits=d))
-    fmt_p   <- function(p) ifelse(is.na(p), "",
-                                  ifelse(p < sci_p_below, formatC(p, format="e", digits=2),
-                                         formatC(p, format="f", digits=3)))
-    blocks <- list()
-    for (nm in family_list) {
-      res <- results[[nm]]; if (is.null(res) || is.null(res$contrasts) || !nrow(res$contrasts)) next
-      dfc <- res$contrasts %>%
-        mutate(
-          estimate = as.numeric(estimate),
-          SE       = as.numeric(SE),
-          lower.CL = as.numeric(lower.CL),
-          upper.CL = as.numeric(upper.CL),
-          p.value  = as.numeric(p.value),
-          effect   = paste0(fmt_num(estimate,3), " [", fmt_num(lower.CL,3), ", ",
-                            fmt_num(upper.CL,3), "]; p=", fmt_p(p.value))
-        ) %>%
-        select(label, contrast_set, contrast, effect)
-      blocks[[length(blocks)+1]] <- dfc
-    }
-    out_tab <- .bind_if(blocks)
-    if (is.null(out_tab)) out_tab <- tibble(label="—", contrast_set="—", contrast="No contrasts", effect="—")
-    dir.create(dirname(filename), recursive = TRUE, showWarnings = FALSE)
-    xt <- xtable::xtable(out_tab,
-                         caption = "ALL contrasts (Holm p shown; no filtering)",
-                         label   = paste0("tab:", safe_filename(basename(filename))))
-    out_tex <- paste0(filename, ".tex")
-    print(xt, include.rownames = FALSE, file = out_tex, sanitize.text.function = identity)
-    cat("Wrote LaTeX to: ", normalizePath(out_tex, winslash="/"), "\n")
-    invisible(out_tab)
-  }
-}
-if (!exists("make_family_txt_all", mode = "function")) {
-  make_family_txt_all <- function(family_list, results, filename_txt, sci_p_below = 1e-3){
-    fmt_num <- function(x, d = 3) ifelse(is.na(x), "NA", formatC(x, format = "f", digits = d))
-    fmt_p   <- function(p) ifelse(is.na(p), "NA",
-                                  ifelse(p < sci_p_below, formatC(p, format="e", digits=2),
-                                         formatC(p, format="f", digits=3)))
-    lines <- c("==== ALL contrasts (no filtering) ====")
-    for (nm in family_list) {
-      res <- results[[nm]]; if (is.null(res) || is.null(res$contrasts) || !nrow(res$contrasts)) next
-      lines <- c(lines, sprintf("\n-- %s --", res$label %||% nm))
-      dfc <- res$contrasts %>%
-        mutate(
-          estimate = as.numeric(estimate),
-          lower.CL = as.numeric(lower.CL),
-          upper.CL = as.numeric(upper.CL),
-          p.value  = as.numeric(p.value),
-          eff_str  = paste0(fmt_num(estimate,3), " [", fmt_num(lower.CL,3), ", ",
-                            fmt_num(upper.CL,3), "]; p=", fmt_p(p.value))
-        )
-      for (cs in unique(dfc$contrast_set)) {
-        lines <- c(lines, paste0("  * ", cs))
-        sub <- dfc %>% filter(contrast_set == cs)
-        add <- paste0("     - ", sub$contrast, ": ", sub$eff_str)
-        lines <- c(lines, add)
-      }
-    }
-    dir.create(dirname(filename_txt), recursive = TRUE, showWarnings = FALSE)
-    writeLines(lines, filename_txt)
-    cat("Wrote TXT to: ", normalizePath(filename_txt, winslash="/"), "\n")
-    invisible(filename_txt)
-  }
-}
+# Toggle: if FALSE, avoid keeping singular lmer fits (will try lme/gls fallback for model selection)
+ALLOW_SINGULAR <- TRUE
+alpha <- 0.05
 
-# ---------- Load & harmonise ----------
-chr <- read_csv("clean_chr.csv",          show_col_types = FALSE)
-pol <- read_csv("clean_pol_modified.csv", show_col_types = FALSE)
+# ---------- helpers ----------
+`%||%` <- function(a,b) if(!is.null(a)) a else b
+fmt_p <- function(p) ifelse(is.na(p), "NA",
+                            ifelse(p < 1e-3, formatC(p, format="e", digits=2),
+                                   sprintf("%.3f", p)))
+fmt_n <- function(x, d=3) ifelse(is.na(x), "NA", formatC(x, format="f", digits=d))
+hdr <- function(txt){ c("", paste0("## ", txt), strrep("-", nchar(txt)+3)) }
 
-setwd("C:/Users/fmura/Documents/groningen/Hon Project Arctic Algae/Data/statistical analysis")
-
-df0 <- bind_rows(chr, pol) %>%
-  mutate(
-    time_std = case_when(
-      as.character(time) %in% c("0", "t0")   ~ "t0",
-      as.character(time) %in% c("24","t24")  ~ "t24",
-      TRUE ~ NA_character_
-    ),
-    species   = factor(species),
-    sal_adapt = factor(sal_adapt, levels = c(25,45), labels = c("A25","A45")),
-    sal_exp   = factor(sal_exp,   levels = c(25,45), labels = c("E25","E45")),
-    repl      = factor(repl)
-  )
-
-# Keep only DMS(P)t rows and t0/t24
-df <- df0 %>% filter(id == "DMS(P)t", time_std %in% c("t0","t24"))
-
-# --- Build paired dataset per bottle branch (control/shock at t24) ---
-# Baseline at t0 (scaled to bottle start density)
-base_t0 <- df %>%
-  filter(time_std == "t0") %>%
-  mutate(dens_t0_bottle = 0.6 * cell_dens_avr) %>%
-  select(
-    species, sal_adapt, repl,
-    yield_t0 = yield,
-    dens_t0  = dens_t0_bottle,
-    size_t0  = cell_size_avr
-  )
-
-# t24 observed
-t24 <- df %>%
-  filter(time_std == "t24") %>%
-  select(
-    species, sal_adapt, sal_exp, repl,
-    yield_t24 = yield,
-    dens_t24  = cell_dens_avr,
-    size_t24  = cell_size_avr
-  )
-
-# Join: each t24 branch gets its own t0 baseline
-paired <- t24 %>%
-  inner_join(base_t0, by = c("species","sal_adapt","repl")) %>%
-  mutate(
-    bottle    = interaction(species, sal_adapt, repl, drop = TRUE),
-    d_yield   = yield_t24 - yield_t0,
-    d_dens    = dens_t24  - dens_t0,
-    d_size    = size_t24  - size_t0,
-    pct_yield = ifelse(is.finite(yield_t0) & yield_t0 != 0,
-                       (yield_t24 / yield_t0 - 1) * 100, NA_real_),
-    pct_dens  = ifelse(is.finite(dens_t0)  & dens_t0  != 0,
-                       (dens_t24  / dens_t0  - 1) * 100, NA_real_),
-    pct_size  = ifelse(is.finite(size_t0)  & size_t0  != 0,
-                       (size_t24  / size_t0  - 1) * 100, NA_real_)
-  )
-
-# --- Quick QC: how many paired branches per cell? (prints to console) ---
-paired %>%
-  count(species, sal_adapt, sal_exp, name = "n_branches") %>%
-  arrange(species, sal_adapt, sal_exp) %>%
-  print(n = 50)
-
-# --- Analysis helper: Δ-LMM + emmeans (Holm) ---
-analyze_delta <- function(dat, d_col, pct_col, nice_label, adjust = "holm") {
-  d_use <- dat %>%
-    select(species, sal_adapt, sal_exp, repl, bottle, !!d_col, !!pct_col) %>%
-    rename(delta = !!d_col, pct = !!pct_col) %>%
-    filter(!is.na(delta))
-  if (nrow(d_use) < 8L) {
-    message("[", nice_label, "] Too few paired rows; skipping."); return(NULL)
-  }
-  fit <- tryCatch(lmer(delta ~ species * sal_adapt * sal_exp + (1 | bottle), data = d_use),
-                  error = function(e) NULL)
-  if (is.null(fit)) {
-    message("[", nice_label, "] lmer failed; trying lm without random effect.")
-    fit <- tryCatch(lm(delta ~ species * sal_adapt * sal_exp, data = d_use),
-                    error = function(e) NULL)
-  }
-  if (is.null(fit)) { message("[", nice_label, "] Modeling failed."); return(NULL) }
-  
-  aov_tbl <- car::Anova(fit, type = 3) %>% broom::tidy()
-  
-  out_sets <- list(
-    "Species within sal_adapt × sal_exp" =
-      pairs(emmeans(fit, ~ species   | sal_adapt * sal_exp), adjust = adjust),
-    "E25 vs E45 within species × sal_adapt" =
-      pairs(emmeans(fit, ~ sal_exp   | species * sal_adapt), adjust = adjust),
-    "Acclimation (A25 vs A45) within species × sal_exp" =
-      pairs(emmeans(fit, ~ sal_adapt | species * sal_exp),   adjust = adjust),
-    "Species (marginal)"   = pairs(emmeans(fit, ~ species),   adjust = adjust),
-    "Acclimation (marginal)" = pairs(emmeans(fit, ~ sal_adapt), adjust = adjust),
-    "Exposure (marginal)"     = pairs(emmeans(fit, ~ sal_exp),   adjust = adjust),
-    "All 3-way cells (Tukey)" = pairs(emmeans(fit, ~ species * sal_adapt * sal_exp),
-                                      adjust = "tukey")
-  )
-  
-  contrasts_df <- lapply(names(out_sets), function(ttl) {
-    as.data.frame(summary(out_sets[[ttl]], infer = c(TRUE, TRUE))) %>%
-      mutate(contrast_set = ttl, .before = 1)
-  }) %>%
-    bind_rows() %>%
-    mutate(label = nice_label,
-           id = "Physiology Δ", response = as.character(d_col))
-  
-  cell_means <- as.data.frame(summary(emmeans(fit, ~ species * sal_adapt * sal_exp), infer = TRUE)) %>%
-    mutate(label = nice_label, id = "Physiology Δ", response = as.character(d_col))
-  
-  pct_tbl <- d_use %>%
-    filter(!is.na(pct)) %>%
-    group_by(species, sal_adapt, sal_exp) %>%
-    summarise(
-      mean_pct = mean(pct, na.rm = TRUE),
-      se_pct   = sd(pct, na.rm = TRUE) / sqrt(sum(!is.na(pct))),
-      n        = n(), .groups = "drop"
-    ) %>%
-    mutate(label = nice_label, id = "Physiology Δ", response = paste0(as.character(d_col), "_pct"))
-  
-  list(fit = fit, anova = aov_tbl, contrasts = contrasts_df,
-       cell_means = cell_means, pct = pct_tbl, label = nice_label)
-}
-
-# --- Run analyses for 3 metrics ---
-res_size  <- analyze_delta(paired, sym("d_size"),  sym("pct_size"),  "Physiology Δ: Mean cell size")
-res_dens  <- analyze_delta(paired, sym("d_dens"),  sym("pct_dens"),  "Physiology Δ: Cell density")
-res_yield <- analyze_delta(paired, sym("d_yield"), sym("pct_yield"), "Physiology Δ: Yield (Fv/Fm)")
-
-# Drop NULLs and name them
-physio_results <- Filter(Negate(is.null), list(
-  physio_delta_size    = res_size,
-  physio_delta_density = res_dens,
-  physio_delta_yield   = res_yield
-))
-
-# --- Merge into your main 'results' list (create if it doesn't exist) ---
-if (!exists("results")) results <- list()
-results <- c(results, physio_results)
-
-# Keep only successful fits with a non-empty contrasts table
-ok_names <- names(results)[vapply(
-  results,
-  function(x) !is.null(x) && !is.null(x$contrasts) && nrow(x$contrasts) > 0,
-  logical(1)
-)]
-stopifnot(length(ok_names) > 0)
-
-# --- Export to the SAME combined files as the rest ---
-out_dir <- get0("out_dir", ifnotfound = "results")
-dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-combined_base <- file.path(out_dir, "ALL_contrasts_combined")
-
-make_family_table_tex_all(ok_names, results, combined_base)                 # LaTeX (all contrasts)
-make_family_txt_all(ok_names, results, paste0(combined_base, ".txt"))       # TXT   (all contrasts)
-
-# --- Optional quick screen plot (Δ by cell) ---
-if (nrow(paired)) {
-  long_d <- paired %>%
-    select(species, sal_adapt, sal_exp, repl, d_yield, d_dens, d_size) %>%
-    pivot_longer(starts_with("d_"), names_to = "metric", values_to = "delta") %>%
-    mutate(metric = dplyr::recode(
-      metric,
-      d_yield = "Yield (Δ)", d_dens = "Cell density (Δ)", d_size = "Mean cell size (Δ)"
-    ))
-  p <- ggplot(long_d, aes(sal_exp, delta)) +
-    geom_boxplot(outlier.shape = NA) +
-    geom_jitter(width = 0.1, alpha = 0.6, size = 1.7) +
-    geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.3) +
-    facet_grid(metric ~ species + sal_adapt, scales = "free_y") +
-    labs(x = "Exposure (t24)", y = "Δ(t24 − t0)", title = "Physiology changes by cell") +
-    theme_minimal(base_size = 12)
-  print(p)
-  # ggsave(file.path(out_dir, "physiology_t0t24_DMSPt_QC.png"), p, width = 8, height = 6, dpi = 300)
-}
-
-# =====================================================
-# BOX PLOTS — t24 (standard style) for all metrics
-#   - Uses your ALT style for uptake_alt & loss_alt
-#   - One PNG per metric + one multipage PDF
-#   - Optional Holm CLD letters (off by default)
-# =====================================================
-
-suppressPackageStartupMessages({
-  library(dplyr); library(tidyr); library(ggplot2); library(readr)
-  library(purrr); library(rlang)
-  library(emmeans)   # only used if add_letters = TRUE
-})
-
-# ---- Output dir for figures ----
-fig_dir <- file.path(getwd(), "results", "figs")
-dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
-
-safe_filename <- function(x) {
-  x <- gsub("[^A-Za-z0-9._-]+", "_", x)
-  x <- gsub("_+$", "", x); tolower(x)
-}
-setwd("C:/Users/fmura/Documents/groningen/Hon Project Arctic Algae/Data/R/csvs_for_chat")
-
-# ---- Load & harmonise once (same as your main script) ----
-chr <- read_csv("clean_chr.csv",           show_col_types = FALSE)
-pol <- read_csv("clean_pol_modified.csv",  show_col_types = FALSE)
+# ---------- load & harmonise ----------
+chr <- read_csv("clean_chr.csv", show_col_types = FALSE)
+pol <- tryCatch(read_csv("clean_pol_modified.csv", show_col_types = FALSE),
+                error = function(e) read_csv("clean_pol.csv", show_col_types = FALSE))
 
 dat_all <- bind_rows(chr, pol) %>%
   mutate(
-    time_std = case_when(
-      as.character(time) %in% c("0","t0")   ~ "t0",
-      as.character(time) %in% c("24","t24") ~ "t24",
-      TRUE ~ NA_character_
-    ),
+    time_num = suppressWarnings(as.integer(as.character(time))),
+    time_std = if_else(time_num == 0L, "t0", "t24"),
+    time     = factor(time_std, levels = c("t0","t24")),
     species   = factor(species),
     sal_adapt = factor(sal_adapt, levels = c(25,45), labels = c("A25","A45")),
     sal_exp   = factor(sal_exp,   levels = c(25,45), labels = c("E25","E45")),
-    repl      = factor(repl)
+    repl      = factor(repl),
+    bottle    = interaction(species, sal_adapt, repl, drop = TRUE)
+  ) %>%
+  select(-time_num)
+
+# ---------- BUILD normalized_df (deterministic t24 sourcing) ----------
+keys <- c("species","sal_adapt","sal_exp","repl")
+
+# 1) DMSPp-only metrics (t24) — tolerate optional columns
+p24 <- dat_all %>%
+  filter(time_std == "t24", id == "DMSPp") %>%
+  select(
+    all_of(keys),
+    mu_POC = u_poc_h_1,               # μ-POC
+    u_dmsp_u_poc,                     # μ-DMSP / μ-POC
+    dmsp_c_poc_mol_mol,               # DMSP-C : POC (mol:mol)
+    any_of(c(                         # OPTIONAL fields
+      "up_dmspp",                    # uptake % of DMSPp
+      "dmsp_uptake_of_total_dmsp",   # fraction/%
+      "dms_puptake_c_poc_mol_mol"    # uptake-C : POC (mol:mol)
+    ))
   )
 
-# =====================================================
-# Build ALT metrics (as in your example)
-#   uptake_alt = (d3_p_taken_up × μ_POC) / POC_t24
-#   loss_alt   = (d3_p_lost_demethylated × μ_POC) / POC_t24
-# =====================================================
-poc_mu_t24 <- dat_all %>%
-  filter(id == "DMSPp", time_std == "t24") %>%
-  select(species, sal_adapt, sal_exp, repl,
-         POC_t24 = total_poc_mg_l,
-         mu_POC  = u_poc_h_1)
+# 2) DMS(P)t-only metrics (t24): direct uptake & loss
+t24 <- dat_all %>%
+  filter(time_std == "t24", id == "DMS(P)t") %>%
+  select(
+    all_of(keys),
+    uptake_alt = d3_p_taken_up,
+    loss_alt   = d3_p_lost_demethylated
+  )
 
-upt_loss_t24 <- dat_all %>%
-  filter(id == "DMS(P)t", time_std == "t24") %>%
-  select(species, sal_adapt, sal_exp, repl,
-         uptake = d3_p_taken_up,
-         loss   = d3_p_lost_demethylated)
+# 3) μ-DMSPd / μ-POC: numerator from DMSPd (t24), denominator μ-POC from DMSPp (t24)
+d24 <- dat_all %>%
+  filter(time_std == "t24", id == "DMSPd") %>%
+  select(all_of(keys), mu_DMSPd = u_dmsp_h_1)
 
-gc_alt <- upt_loss_t24 %>%
-  left_join(poc_mu_t24, by = c("species","sal_adapt","sal_exp","repl")) %>%
+mu_ratio_tbl <- p24 %>%
+  select(all_of(keys), mu_POC) %>%
+  left_join(d24, by = keys) %>%
+  mutate(muDMSPd_over_muPOC = if_else(
+    is.finite(mu_DMSPd) & is.finite(mu_POC) & mu_POC != 0,
+    mu_DMSPd / mu_POC, NA_real_
+  )) %>%
+  select(all_of(keys), muDMSPd_over_muPOC)
+
+# 4) Assemble normalized_df (all rows are t24 + tagged)
+normalized_df <- p24 %>%
+  left_join(t24,          by = keys) %>%
+  left_join(mu_ratio_tbl, by = keys) %>%
   mutate(
-    uptake_alt = if_else(is.finite(mu_POC) & is.finite(POC_t24) & POC_t24 > 0,
-                         (uptake * mu_POC) / POC_t24, NA_real_),
-    loss_alt   = if_else(is.finite(mu_POC) & is.finite(POC_t24) & POC_t24 > 0,
-                         (loss   * mu_POC) / POC_t24, NA_real_)
+    time_std = "t24",
+    time     = factor("t24", levels = c("t0","t24")),
+    id       = "Normalized"
+  ) %>%
+  select(
+    all_of(keys), time, time_std, id,
+    mu_POC, u_dmsp_u_poc, dmsp_c_poc_mol_mol,
+    any_of(c("up_dmspp", "dmsp_uptake_of_total_dmsp", "dms_puptake_c_poc_mol_mol")),
+    muDMSPd_over_muPOC,
+    uptake_alt, loss_alt
   )
 
-# =====================================================
-# Plot helper (your standard style) + optional CLD letters
-# =====================================================
-make_box <- function(dat, value_col, y_label, add_letters = FALSE) {
-  dat_p <- dat %>%
-    mutate(
-      sal_adapt = factor(sal_adapt),
-      sal_exp   = factor(sal_exp),
-      group_x   = interaction(species, sal_adapt, sep = " × ")
-    )
-  p <- ggplot(dat_p, aes(x = group_x, y = .data[[value_col]], fill = sal_exp)) +
-    geom_boxplot(outlier.shape = NA, width = 0.7) +
-    geom_jitter(aes(color = sal_exp), width = 0.15, alpha = 0.6,
-                size = 1.6, show.legend = FALSE) +
-    labs(x = "Species × acclimation salinity", y = y_label, fill = "Exposure") +
-    theme_minimal(base_size = 12) +
-    theme(strip.text = element_text(face = "bold"),
-          legend.position = "top")
+# ---------- analyses (scoped to t24 inside analyze_one) ----------
+analyses <- list(
+  # Production (raw, by source id)
+  list(name="mu_POC_DMSPp",           dat=dat_all,       y="u_poc_h_1",              id="DMSPp",   label="μ-POC (from DMSPp)"),
+  list(name="mu_DMSP_from_DMSPp",     dat=dat_all,       y="u_dmsp_h_1",             id="DMSPp",   label="μ-DMSP (from DMSPp)"),
+  list(name="mu_DMSP_from_DMS",       dat=dat_all,       y="u_dmsp_h_1",             id="DMS",     label="μ-DMSP (from DMS)"),
+  list(name="uptake_d3",              dat=dat_all,       y="d3_p_taken_up",          id="DMS(P)t", label="D3-DMSP taken up"),
+  list(name="loss_d3",                dat=dat_all,       y="d3_p_lost_demethylated", id="DMS(P)t", label="D3-DMSP lost (demethylated)"),
   
-  if (isTRUE(add_letters)) {
-    try({
-      mod <- lm(as.formula(paste(value_col, "~ species * sal_adapt * sal_exp")),
-                data = dat_p)
-      emm <- emmeans(mod, ~ species * sal_adapt * sal_exp)
-      cld_df <- emmeans::cld(emm, adjust = "holm", Letters = letters) %>%
-        as.data.frame() %>%
-        mutate(group_x = interaction(species, sal_adapt, sep = " × "))
-      y_pos <- dat_p %>%
-        group_by(group_x) %>%
-        summarise(y_top = max(.data[[value_col]], na.rm = TRUE) * 1.05,
-                  .groups = "drop")
-      cld_df <- left_join(cld_df, y_pos, by = "group_x")
-      p <- p + geom_text(data = cld_df,
-                         aes(x = group_x, y = y_top, label = .group),
-                         inherit.aes = FALSE)
-    }, silent = TRUE)
-  }
-  p
-}
-
-
-# =====================================================
-# SPEC: what to plot (direct-from-column metrics @ t24)
-# id = source pool; col = column name; label = axis label
-# Any missing columns are skipped with a message.
-# =====================================================
-direct_specs <- tribble(
-  ~id,       ~col,                        ~label,
-  "DMSPp",   "u_poc_h_1",                 "μ-POC (h⁻¹)",
-  "DMSPp",   "u_dmsp_h_1",                "μ-DMSP (h⁻¹) from DMSPp",
-  "DMS",     "u_dmsp_h_1",                "μ-DMSP (h⁻¹) from DMS",
-  "DMSPp",   "u_dmsp_u_poc",              "μ-DMSP / μ-POC",
-  "DMSPp",   "dmsp_c_poc_mol_mol",        "DMSP-C : POC (mol:mol)",
-  "DMS(P)t", "d3_p_taken_up",             "D3-DMSP uptake (raw)",
-  "DMS(P)t", "d3_p_lost_demethylated",    "D3-DMSP loss (demethyl.)",
-  "DMS(P)t", "dms_puptake_c_poc_mol_mol", "DMSP uptake-C : POC (mol:mol)",
-  "DMS(P)t", "dmsp_uptake_of_total_dmsp", "DMSP uptake (% of total DMSP)"  # will be skipped if absent
-  # If you want: "DMSPp","up_dmspp","up_dmspp (units?)"
+  # Normalized (t24 bundle, already t24-scoped by construction)
+  list(name="norm_u_dmsp_u_poc",      dat=normalized_df, y="u_dmsp_u_poc",           id="Normalized", label="μ-DMSP / μ-POC (direct)"),
+  list(name="norm_uptake_alt_direct", dat=normalized_df, y="uptake_alt",             id="Normalized", label="Uptake ALT (direct d3_p_taken_up)"),
+  list(name="norm_muDMSPd_muPOC",     dat=normalized_df, y="muDMSPd_over_muPOC",     id="Normalized", label="μ-DMSPd / μ-POC"),
+  list(name="norm_dmsp_c_poc",        dat=normalized_df, y="dmsp_c_poc_mol_mol",     id="Normalized", label="DMSP-C : POC (mol:mol)"),
+  
+  # EXACT SCOPES (t24 + correct source IDs). Will auto-skip if column missing.
+  list(name="up_dmspp_t24",                  dat=dat_all, y="up_dmspp",                  id="DMSPp",   label="Uptake (% of DMSPp)"),
+  list(name="dmsp_uptake_total_t24",         dat=dat_all, y="dmsp_uptake_of_total_dmsp", id="DMSPp",   label="DMSP uptake of total DMSP"),
+  list(name="dms_puptake_c_poc_t24",         dat=dat_all, y="dms_puptake_c_poc_mol_mol", id="DMSPp",   label="DMSP uptake-C : POC (mol:mol)")
 )
 
-# ---- Generate & save: direct metrics ----
-plots <- list()
-for (i in seq_len(nrow(direct_specs))) {
-  spec <- direct_specs[i,]
-  if (!spec$col %in% names(dat_all)) {
-    message("Skipping '", spec$col, "' (column not found)."); next
+# ---------- core engines ----------
+refit_lmer <- function(data, resp){
+  form <- as.formula(paste(resp, "~ species * sal_adapt * sal_exp + (1|bottle)"))
+  lme4::lmer(form, data = data, REML = TRUE,
+             control = lme4::lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
+}
+
+analyze_one <- function(dat, y, label, id_filter, time_filter = "t24"){
+  lines <- c(hdr(label))
+  
+  # filter scope
+  d0 <- dat %>%
+    filter(time_std == time_filter, id == id_filter) %>%
+    tidyr::drop_na(species, sal_adapt, sal_exp, repl) %>%
+    mutate(bottle = interaction(species, sal_adapt, repl, drop = TRUE)) %>%
+    mutate(.y = suppressWarnings(as.numeric(.data[[y]]))) %>%
+    filter(is.finite(.y))
+  
+  # structural guards
+  if (nrow(d0) < 8L ||
+      n_distinct(d0$species)   < 2 ||
+      n_distinct(d0$sal_adapt) < 2 ||
+      n_distinct(d0$sal_exp)   < 2) {
+    return(c(lines, "Skipped: insufficient data or factors lack ≥2 levels.\n"))
   }
-  df_plot <- dat_all %>%
-    filter(id == spec$id, time_std == "t24") %>%
-    select(species, sal_adapt, sal_exp, repl, value = !!sym(spec$col))
-  if (!nrow(df_plot)) { message("No t24 rows for ", spec$col, " in ", spec$id); next }
-  p <- make_box(df_plot, "value", spec$label, add_letters = FALSE)
-  fname <- file.path(fig_dir, paste0("box_", safe_filename(paste(spec$id, spec$col, sep = "_")), ".png"))
-  ggsave(fname, p, width = 7, height = 4.5, dpi = 300, bg = "white")
-  plots[[paste(spec$id, spec$col, sep = "_")]] <- p
+  if (length(unique(d0$.y)) < 2) {
+    return(c(lines, "Skipped: response has < 2 unique finite values.\n"))
+  }
+  
+  # Baseline lmer & diagnostics
+  base_fit <- tryCatch(refit_lmer(d0, ".y"), error=function(e) NULL)
+  if (is.null(base_fit)) return(c(lines, "Skipped: baseline lmer failed.\n"))
+  
+  r <- residuals(base_fit, type="pearson")
+  shapiro_p <- tryCatch(shapiro.test(as.numeric(r))$p.value, error=function(e) NA_real_)
+  grp <- with(d0, interaction(species, sal_adapt, sal_exp, drop = TRUE))
+  levene_p <- tryCatch(car::leveneTest(r ~ grp, center = median)[[1,"Pr(>F)"]], error=function(e) NA_real_)
+  
+  assumptions <- c(
+    paste0("Normality (Shapiro–Wilk on residuals): p = ", fmt_p(shapiro_p)),
+    paste0("Homoskedasticity (Levene across S×A×E): p = ", fmt_p(levene_p))
+  )
+  flagged <- c()
+  if (!is.na(shapiro_p) && shapiro_p < alpha) flagged <- c(flagged, paste0("Normality (p=", fmt_p(shapiro_p), ")"))
+  if (!is.na(levene_p)  && levene_p  < alpha) flagged <- c(flagged,  paste0("Homoskedasticity (p=", fmt_p(levene_p), ")"))
+  
+  changes <- character()
+  transform <- NULL
+  y_use <- ".y"
+  
+  # Optional transform for strong positive skew
+  sk <- suppressWarnings(e1071::skewness(d0$.y, na.rm = TRUE))
+  if (is.finite(sk) && sk > 1 && all(d0$.y >= 0, na.rm = TRUE)) {
+    d0$.y_log1p <- log1p(d0$.y)
+    base_fit2 <- tryCatch(refit_lmer(d0, ".y_log1p"), error=function(e) NULL)
+    if (!is.null(base_fit2)) {
+      base_fit <- base_fit2; transform <- "log1p"; y_use <- ".y_log1p"
+      changes <- c(changes, "Applied log1p due to skew > 1; post-hoc back-transformed.")
+      r2 <- residuals(base_fit, type="pearson")
+      levene_p <- tryCatch(car::leveneTest(r2 ~ grp, center = median)[[1,"Pr(>F)"]], error=function(e) NA_real_)
+      flagged <- flagged[!grepl("^Homoskedasticity", flagged)]
+      if (!is.na(levene_p) && levene_p < alpha)
+        flagged <- c(flagged, paste0("Homoskedasticity (p=", fmt_p(levene_p), ")"))
+    } else if (!is.na(shapiro_p) && shapiro_p < alpha) {
+      changes <- c(changes, "Normality flagged but log1p not applied (failed refit or negative values).")
+    }
+  } else if (!is.na(shapiro_p) && shapiro_p < alpha) {
+    changes <- c(changes, "Normality flagged; retained scale (no positive-only transform justified).")
+  }
+  
+  # Heteroskedastic candidates via nlme::lme with varIdent if Levene < alpha (AIC selection)
+  selected <- base_fit
+  if (!is.na(levene_p) && levene_p < alpha) {
+    form_fixed <- as.formula(paste(y_use, "~ species * sal_adapt * sal_exp"))
+    fit_try <- function(w) tryCatch(nlme::lme(fixed=form_fixed, random=~1|bottle, data=d0,
+                                              method="REML", weights=w, control=nlme::lmeControl(msMaxIter=200)),
+                                    error=function(e) NULL)
+    cands <- list(
+      none = fit_try(NULL),
+      byE  = fit_try(nlme::varIdent(~1|sal_exp)),
+      byS  = fit_try(nlme::varIdent(~1|species)),
+      byA  = fit_try(nlme::varIdent(~1|sal_adapt)),
+      byAE = fit_try(nlme::varIdent(~1|sal_adapt:sal_exp))
+    )
+    ok <- cands[!vapply(cands, is.null, logical(1))]
+    if (length(ok)) {
+      aics <- sapply(ok, AIC)
+      pick <- names(which.min(aics))
+      selected <- ok[[pick]]
+      changes <- c(changes, paste0("Modeled heteroskedasticity via nlme::lme + varIdent (", pick, ") by AIC."))
+    }
+  }
+  
+  # Optionally avoid singular lmer for selection block
+  if (!ALLOW_SINGULAR && inherits(selected, "merMod") && lme4::isSingular(selected, tol=1e-4)) {
+    form_fixed <- as.formula(paste(y_use, "~ species * sal_adapt * sal_exp"))
+    sel2 <- tryCatch(nlme::lme(fixed=form_fixed, random=~1|bottle, data=d0, method="REML",
+                               control=nlme::lmeControl(msMaxIter=200)), error=function(e) NULL)
+    if (is.null(sel2)) sel2 <- tryCatch(nlme::gls(form_fixed, data=d0, method="REML"), error=function(e) NULL)
+    if (!is.null(sel2)) { selected <- sel2; changes <- c(changes, "Avoided singular lmer by switching to lme/gls for selection.") }
+  }
+  
+  # ---------- INFERENCE ENGINE (lmer unless singular → lm) ----------
+  used_engine <- "lmer"
+  rand_var <- NA_real_
+  if (inherits(base_fit, "merMod")) {
+    vc_tab <- tryCatch(as.data.frame(VarCorr(base_fit)), error=function(e) NULL)
+    if (!is.null(vc_tab)) {
+      rv <- tryCatch(vc_tab %>% dplyr::filter(grp=="bottle", var1=="(Intercept)") %>% dplyr::pull(vcov), error=function(e) numeric())
+      rand_var <- rv[1] %||% NA_real_
+    }
+  }
+  
+  fit_inf <- tryCatch(refit_lmer(d0, y_use), error=function(e) NULL)
+  if (is.null(fit_inf)) return(c(lines, "Skipped: inference refit failed.\n"))
+  if (inherits(fit_inf, "merMod") && lme4::isSingular(fit_inf, tol=1e-4)) {
+    # Drop random intercept and use OLS for inference on fixed effects
+    fit_inf <- stats::lm(as.formula(paste(y_use, "~ species * sal_adapt * sal_exp")), data = d0)
+    used_engine <- "lm"
+    changes <- c(changes,
+                 sprintf("Random intercept singular (Var[bottle] ≈ %s); dropped RE and used OLS (lm) for inference.",
+                         fmt_n(rand_var, d=6)))
+  }
+  
+  # Type-III ANOVA on inference engine
+  aov_tab <- suppressWarnings(car::Anova(fit_inf, type="III"))
+  aov_df  <- as.data.frame(aov_tab)
+  pcol <- intersect(colnames(aov_df), c("Pr(>F)","Pr(>Chisq)","Pr(>Chi)","Pr..F."))
+  if (!length(pcol)) return(c(lines, "Type-III ANOVA failed (no p-value column).", ""))
+  
+  getp <- function(term){
+    row <- aov_df[rownames(aov_df)==term, , drop=FALSE]
+    if (!nrow(row)) return(NA_real_)
+    as.numeric(row[[pcol[1]]][1])
+  }
+  p3  <- getp("species:sal_adapt:sal_exp")
+  pSA <- getp("species:sal_adapt")
+  pSE <- getp("species:sal_exp")
+  pAE <- getp("sal_adapt:sal_exp")
+  pS  <- getp("species")
+  pA  <- getp("sal_adapt")
+  pE  <- getp("sal_exp")
+  
+  # R2 from selected model (AIC-chosen; may be lmer/lme/gls). This is for description only.
+  R2 <- suppressWarnings(tryCatch(MuMIn::r.squaredGLMM(selected), error=function(e) c(NA_real_, NA_real_)))
+  
+  # --- Prose reporting up to ANOVA ---
+  lines <- c(lines,
+             "Assumption checks:",
+             paste0("  - ", assumptions),
+             paste0("Assumptions flagged (α=", alpha, "): ",
+                    if (length(flagged)) paste(flagged, collapse = "; ") else "none."),
+             if (length(changes)) c("Changes made:", paste0("  - ", changes)) else "Changes made: none.",
+             paste0("Inference engine: ",
+                    if (used_engine=="lm") "OLS (lm) — random intercept dropped due to singularity"
+                    else "lmer (random-intercept)"),
+             if (!is.na(rand_var)) paste0("  - Estimated Var[bottle] from lmer: ", fmt_n(rand_var, d=6)) else NULL,
+             "Type-III ANOVA (on inference engine above):",
+             paste0("  - species: p=", fmt_p(pS),
+                    "; sal_adapt: p=", fmt_p(pA),
+                    "; sal_exp: p=", fmt_p(pE)),
+             paste0("  - species:sal_adapt: p=", fmt_p(pSA),
+                    "; species:sal_exp: p=", fmt_p(pSE),
+                    "; sal_adapt:sal_exp: p=", fmt_p(pAE)),
+             paste0("  - species:sal_adapt:sal_exp: p=", fmt_p(p3)),
+             paste0("Model R² (selected fit) — marginal=", fmt_n(as.numeric(R2[1])),
+                    ", conditional=", fmt_n(as.numeric(R2[2]))))
+  
+  # --- GATED post-hoc: proceed only if omnibus indicates it ---
+  proceed <- any(c(p3,pSA,pSE,pAE,pS,pA,pE) < alpha, na.rm = TRUE)
+  if (!proceed) {
+    lines <- c(lines, "Post-hoc: skipped (no omnibus terms significant at α=0.05).", "")
+    return(lines)
+  }
+  
+  # Choose what to compare:
+  do_all <- any(c(p3,pSA,pSE,pAE) < alpha, na.rm = TRUE)
+  trn <- if (!is.null(transform) && transform=="log1p") "log1p" else NULL
+  
+  posthoc_lines <- character()
+  as_lines <- function(df){
+    if (!nrow(df)) return(character())
+    sprintf("  - %s: %s [%s, %s]; p=%s",
+            df$contrast %||% df$comparison %||% df$levels,
+            fmt_n(df$estimate), fmt_n(df$lower.CL), fmt_n(df$upper.CL), fmt_p(df$p.value))
+  }
+  regrid_if <- function(em) if (!is.null(trn) && trn=="log1p") emmeans::regrid(em, transform="response") else em
+  
+  if (do_all) {
+    em1 <- regrid_if(emmeans::emmeans(fit_inf, ~ sal_exp, by = c("species","sal_adapt")))
+    cmp1 <- summary(emmeans::contrast(em1, "pairwise", adjust="holm"), infer=c(TRUE,TRUE))
+    posthoc_lines <- c(posthoc_lines, "Post-hoc (E within species × acclimation):", as_lines(as.data.frame(cmp1)))
+    
+    emS <- regrid_if(emmeans::emmeans(fit_inf, ~ species, by = c("sal_adapt","sal_exp")))
+    cmpS <- summary(emmeans::contrast(emS, "pairwise", adjust="holm"), infer=c(TRUE,TRUE))
+    posthoc_lines <- c(posthoc_lines, "Post-hoc (Species within acclimation × exposure):", as_lines(as.data.frame(cmpS)))
+    
+    emA <- regrid_if(emmeans::emmeans(fit_inf, ~ sal_adapt, by = c("species","sal_exp")))
+    cmpA <- summary(emmeans::contrast(emA, "pairwise", adjust="holm"), infer=c(TRUE,TRUE))
+    posthoc_lines <- c(posthoc_lines, "Post-hoc (Acclimation within species × exposure):", as_lines(as.data.frame(cmpA)))
+    
+    em_all <- regrid_if(emmeans::emmeans(fit_inf, ~ species * sal_adapt * sal_exp))
+    cmp_all <- summary(pairs(em_all, adjust="tukey"), infer=c(TRUE,TRUE))
+    posthoc_lines <- c(posthoc_lines, "Post-hoc (All 3-way cell means; Tukey):", as_lines(as.data.frame(cmp_all)))
+  } else {
+    if (!is.na(pS) && pS < alpha) {
+      em_mS <- regrid_if(emmeans::emmeans(fit_inf, ~ species))
+      cmp_mS <- summary(pairs(em_mS, adjust="holm"), infer=c(TRUE,TRUE))
+      posthoc_lines <- c(posthoc_lines, "Post-hoc (Species; marginal):", as_lines(as.data.frame(cmp_mS)))
+    }
+    if (!is.na(pA) && pA < alpha) {
+      em_mA <- regrid_if(emmeans::emmeans(fit_inf, ~ sal_adapt))
+      cmp_mA <- summary(pairs(em_mA, adjust="holm"), infer=c(TRUE,TRUE))
+      posthoc_lines <- c(posthoc_lines, "Post-hoc (Acclimation; marginal):", as_lines(as.data.frame(cmp_mA)))
+    }
+    if (!is.na(pE) && pE < alpha) {
+      em_mE <- regrid_if(emmeans::emmeans(fit_inf, ~ sal_exp))
+      cmp_mE <- summary(pairs(em_mE, adjust="holm"), infer=c(TRUE,TRUE))
+      posthoc_lines <- c(posthoc_lines, "Post-hoc (Exposure; marginal):", as_lines(as.data.frame(cmp_mE)))
+    }
+  }
+  
+  c(lines, if (length(posthoc_lines)) posthoc_lines else "Post-hoc: none produced.", "")
 }
 
-# ---- ALT metrics (from gc_alt built above) ----
-alt_specs <- tribble(
-  ~col,         ~label,                                      ~stub,
-  "uptake_alt", "(D3P-Uptake × μ-POC) / POC(t24)",          "alt_uptake",
-  "loss_alt",   "(D3P-Loss × μ-POC) / POC(t24)",            "alt_loss"
-)
+# ---------- Run all analyses & write TXT ----------
+prose <- c("==== MIXED-MODEL RESULTS (prose) ====",
+           paste0("Alpha = ", alpha),
+           "Type-III ANOVA computed on a clean lmer refit; if the random intercept is singular,",
+           "we drop it and use OLS (lm) for inference on fixed effects. Post-hoc uses the same engine.",
+           "If Levene < alpha, model selection considers nlme::lme + varIdent by AIC (emmeans not run on lme).",
+           "")
 
-for (i in seq_len(nrow(alt_specs))) {
-  spec <- alt_specs[i,]
-  if (!spec$col %in% names(gc_alt)) next
-  df_plot <- gc_alt %>% select(species, sal_adapt, sal_exp, repl, value = !!sym(spec$col))
-  p <- make_box(df_plot, "value", spec$label, add_letters = FALSE)
-  fname <- file.path(fig_dir, paste0("box_", spec$stub, ".png"))
-  ggsave(fname, p, width = 7, height = 4.5, dpi = 300, bg = "white")
-  plots[[spec$stub]] <- p
+for (a in analyses) {
+  if (!a$y %in% names(a$dat)) {
+    prose <- c(prose, hdr(a$label), "Skipped: response column not present.\n")
+    next
+  }
+  blk <- tryCatch(analyze_one(a$dat, a$y, a$label, a$id, time_filter = "t24"),
+                  error=function(e) c(hdr(a$label), paste("Analysis failed:", conditionMessage(e)), ""))
+  prose <- c(prose, blk)
 }
 
-# ---- Also write a single multipage PDF with all plots ----
-if (length(plots)) {
-  pdf(file.path(fig_dir, "all_boxplots_t24.pdf"), width = 7, height = 4.5, onefile = TRUE)
-  for (nm in names(plots)) print(plots[[nm]])
-  dev.off()
-  message("Saved: ", normalizePath(file.path(fig_dir, "all_boxplots_t24.pdf"), winslash = "/"))
-} else {
-  message("No plots produced.")
-}
+dir.create("results", recursive = TRUE, showWarnings = FALSE)
+out_txt <- file.path("results", "ANOVA_prose_results.txt")
+writeLines(prose, out_txt)
+cat("Wrote TXT to: ", normalizePath(out_txt, winslash = "/"), "\n", sep="")
+
+# ---------- (LaTeX export intentionally disabled) ----------
+# library(xtable)
+# make_family_table_tex_all <- function(...) { }
+# combined_base <- file.path("results", "ALL_contrasts_combined")
+# make_family_table_tex_all(ok_names, results, combined_base)
