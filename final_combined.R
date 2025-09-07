@@ -2,7 +2,7 @@
 # ONE-BLOCK PIPELINE (prose TXT only; no LaTeX)
 # t24-only changes: use raw columns directly by ID (no re-compute of responses)
 # ============================================================
-set.seed(42)
+set.seed(42) #this is the first comment
 
 setwd("C:/Users/fmura/Documents/groningen/Hon Project Arctic Algae/Data/R/csvs_for_chat")
 
