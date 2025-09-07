@@ -1,0 +1,970 @@
+==== MIXED-MODEL RESULTS (prose) ====
+Alpha = 0.05
+Type-III ANOVA computed on a clean lmer refit; if the random intercept is singular,
+we drop it and use OLS (lm) for inference on fixed effects. Post-hoc uses the same engine.
+t24-only: responses pulled directly from requested columns by ID; no re-computation of μ metrics.
+
+
+## μ-POC (from DMSPp)
+---------------------
+Diagnostics (auto, no plots):
+Diagnostics for: μ-POC (from DMSPp) (DMSPp @ t24)
+  n(resid)=22; Shapiro p=0.153; skew=0.62; kurt=-0.61
+  Heteroskedasticity — Levene p=0.765; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.00156
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.153
+  - Homoskedasticity (Levene across S×A×E): p = 0.765
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=4.09e-57; sal_adapt: p=6.33e-05; sal_exp: p=1.04e-05
+  - species:sal_adapt: p=1.24e-05; species:sal_exp: p=1.11e-06; sal_adapt:sal_exp: p=0.076
+  - species:sal_adapt:sal_exp: p=0.493
+Model R² (selected fit) — marginal=0.944, conditional=0.945
+Post-hoc (E within species × acclimation):
+  - E25 - E45: 0.007 [0.004, 0.010]; p=0.001
+  - E25 - E45: 0.001 [-0.002, 0.005]; p=0.327
+  - E25 - E45: 0.006 [0.002, 0.009]; p=0.006
+  - E25 - E45: -0.002 [-0.006, 0.001]; p=0.217
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.011 [0.008, 0.014]; p=7.89e-07
+  - Chryso - Polarella: 0.018 [0.015, 0.021]; p=9.96e-09
+  - Chryso - Polarella: 0.005 [0.002, 0.008]; p=0.001
+  - Chryso - Polarella: 0.010 [0.007, 0.014]; p=7.44e-06
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: -0.005 [-0.008, -0.002]; p=0.002
+  - A25 - A45: 0.002 [-0.001, 0.005]; p=0.218
+  - A25 - A45: -0.007 [-0.010, -0.003]; p=6.30e-04
+  - A25 - A45: -0.001 [-0.004, 0.001]; p=0.293
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.011 [0.006, 0.016]; p=1.67e-05
+  - Chryso A25 E25 - Chryso A45 E25: -0.005 [-0.010, -0.001]; p=0.025
+  - Chryso A25 E25 - Polarella A45 E25: 0.013 [0.008, 0.018]; p=1.32e-05
+  - Chryso A25 E25 - Chryso A25 E45: 0.007 [0.002, 0.013]; p=0.014
+  - Chryso A25 E25 - Polarella A25 E45: 0.012 [0.008, 0.017]; p=4.12e-06
+  - Chryso A25 E25 - Chryso A45 E45: 0.001 [-0.005, 0.006]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: 0.011 [0.006, 0.016]; p=1.78e-05
+  - Polarella A25 E25 - Chryso A45 E25: -0.016 [-0.021, -0.012]; p=1.52e-07
+  - Polarella A25 E25 - Polarella A45 E25: 0.002 [-0.003, 0.007]; p=0.888
+  - Polarella A25 E25 - Chryso A25 E45: -0.004 [-0.009, 0.001]; p=0.136
+  - Polarella A25 E25 - Polarella A25 E45: 0.001 [-0.004, 0.007]; p=0.946
+  - Polarella A25 E25 - Chryso A45 E45: -0.011 [-0.016, -0.005]; p=1.43e-04
+  - Polarella A25 E25 - Polarella A45 E45: -0.000 [-0.005, 0.005]; p=1.000
+  - Chryso A45 E25 - Polarella A45 E25: 0.018 [0.013, 0.024]; p=2.20e-07
+  - Chryso A45 E25 - Chryso A25 E45: 0.012 [0.008, 0.017]; p=4.57e-06
+  - Chryso A45 E25 - Polarella A25 E45: 0.018 [0.013, 0.022]; p=5.29e-08
+  - Chryso A45 E25 - Chryso A45 E45: 0.006 [-0.000, 0.012]; p=0.065
+  - Chryso A45 E25 - Polarella A45 E45: 0.016 [0.012, 0.021]; p=1.59e-07
+  - Polarella A45 E25 - Chryso A25 E45: -0.006 [-0.011, -0.000]; p=0.029
+  - Polarella A45 E25 - Polarella A25 E45: -0.001 [-0.006, 0.005]; p=1.000
+  - Polarella A45 E25 - Chryso A45 E45: -0.013 [-0.019, -0.007]; p=7.47e-05
+  - Polarella A45 E25 - Polarella A45 E45: -0.002 [-0.008, 0.004]; p=0.861
+  - Chryso A25 E45 - Polarella A25 E45: 0.005 [0.001, 0.010]; p=0.022
+  - Chryso A25 E45 - Chryso A45 E45: -0.007 [-0.012, -0.001]; p=0.011
+  - Chryso A25 E45 - Polarella A45 E45: 0.004 [-0.001, 0.008]; p=0.146
+  - Polarella A25 E45 - Chryso A45 E45: -0.012 [-0.017, -0.007]; p=3.64e-05
+  - Polarella A25 E45 - Polarella A45 E45: -0.001 [-0.006, 0.003]; p=0.948
+  - Chryso A45 E45 - Polarella A45 E45: 0.010 [0.005, 0.016]; p=1.52e-04
+
+
+## μ-DMSP (from DMSPp)
+----------------------
+Diagnostics (auto, no plots):
+Diagnostics for: μ-DMSP (from DMSPp) (DMSPp @ t24)
+  n(resid)=23; Shapiro p=0.278; skew=0.06; kurt=0.91
+  Heteroskedasticity — Levene p=0.658; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.000442
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.278
+  - Homoskedasticity (Levene across S×A×E): p = 0.658
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=1.66e-22; sal_adapt: p=0.178; sal_exp: p=6.01e-77
+  - species:sal_adapt: p=3.25e-10; species:sal_exp: p=1.56e-23; sal_adapt:sal_exp: p=7.46e-09
+  - species:sal_adapt:sal_exp: p=6.45e-04
+Model R² (selected fit) — marginal=0.963, conditional=0.971
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -0.006 [-0.010, -0.002]; p=0.014
+  - E25 - E45: -0.019 [-0.023, -0.014]; p=1.81e-05
+  - E25 - E45: -0.011 [-0.015, -0.006]; p=7.03e-04
+  - E25 - E45: -0.037 [-0.042, -0.032]; p=7.76e-08
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.002 [-0.002, 0.007]; p=0.323
+  - Chryso - Polarella: -0.006 [-0.012, -0.001]; p=0.019
+  - Chryso - Polarella: -0.011 [-0.015, -0.006]; p=1.93e-04
+  - Chryso - Polarella: -0.032 [-0.037, -0.028]; p=3.15e-10
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.012 [0.007, 0.016]; p=8.51e-05
+  - A25 - A45: 0.003 [-0.002, 0.008]; p=0.246
+  - A25 - A45: 0.007 [0.002, 0.012]; p=0.006
+  - A25 - A45: -0.015 [-0.019, -0.010]; p=5.69e-06
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.002 [-0.005, 0.010]; p=0.963
+  - Chryso A25 E25 - Chryso A45 E25: 0.012 [0.004, 0.019]; p=0.002
+  - Chryso A25 E25 - Polarella A45 E25: 0.005 [-0.003, 0.014]; p=0.452
+  - Chryso A25 E25 - Chryso A25 E45: -0.006 [-0.014, 0.002]; p=0.140
+  - Chryso A25 E25 - Polarella A25 E45: -0.017 [-0.024, -0.009]; p=3.43e-05
+  - Chryso A25 E25 - Chryso A45 E45: 0.001 [-0.007, 0.008]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: -0.031 [-0.039, -0.024]; p=1.03e-08
+  - Polarella A25 E25 - Chryso A45 E25: 0.009 [0.002, 0.017]; p=0.010
+  - Polarella A25 E25 - Polarella A45 E25: 0.003 [-0.006, 0.011]; p=0.917
+  - Polarella A25 E25 - Chryso A25 E45: -0.008 [-0.016, -0.001]; p=0.028
+  - Polarella A25 E25 - Polarella A25 E45: -0.019 [-0.026, -0.011]; p=2.52e-04
+  - Polarella A25 E25 - Chryso A45 E45: -0.001 [-0.009, 0.006]; p=0.998
+  - Polarella A25 E25 - Polarella A45 E45: -0.034 [-0.041, -0.026]; p=4.06e-09
+  - Chryso A45 E25 - Polarella A45 E25: -0.006 [-0.015, 0.002]; p=0.217
+  - Chryso A45 E25 - Chryso A25 E45: -0.018 [-0.025, -0.010]; p=1.80e-05
+  - Chryso A45 E25 - Polarella A25 E45: -0.028 [-0.036, -0.021]; p=4.74e-08
+  - Chryso A45 E25 - Chryso A45 E45: -0.011 [-0.018, -0.003]; p=0.009
+  - Chryso A45 E25 - Polarella A45 E45: -0.043 [-0.051, -0.036]; p=1.73e-10
+  - Polarella A45 E25 - Chryso A25 E45: -0.011 [-0.020, -0.003]; p=0.007
+  - Polarella A45 E25 - Polarella A25 E45: -0.022 [-0.030, -0.013]; p=5.34e-06
+  - Polarella A45 E25 - Chryso A45 E45: -0.004 [-0.013, 0.004]; p=0.672
+  - Polarella A45 E25 - Polarella A45 E45: -0.037 [-0.045, -0.028]; p=1.39e-06
+  - Chryso A25 E45 - Polarella A25 E45: -0.011 [-0.018, -0.003]; p=0.004
+  - Chryso A25 E45 - Chryso A45 E45: 0.007 [-0.001, 0.014]; p=0.079
+  - Chryso A25 E45 - Polarella A45 E45: -0.025 [-0.033, -0.018]; p=1.74e-07
+  - Polarella A25 E45 - Chryso A45 E45: 0.018 [0.010, 0.025]; p=1.82e-05
+  - Polarella A25 E45 - Polarella A45 E45: -0.015 [-0.022, -0.007]; p=1.18e-04
+  - Chryso A45 E45 - Polarella A45 E45: -0.032 [-0.040, -0.025]; p=6.90e-09
+
+
+## μ-DMSP (from DMS)
+--------------------
+Diagnostics (auto, no plots):
+Diagnostics for: μ-DMSP (from DMS) (DMS @ t24)
+  n(resid)=24; Shapiro p=0.0346; skew=0.96; kurt=2.61
+  Heteroskedasticity — Levene p=0.507; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.015
+  Outliers — |std resid|>3: 1; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.035
+  - Homoskedasticity (Levene across S×A×E): p = 0.507
+Assumptions flagged (α=0.05): Normality (p=0.035)
+Changes made:
+  - Normality flagged; retained scale (no positive-only transform justified).
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=0.078; sal_adapt: p=0.963; sal_exp: p=0.252
+  - species:sal_adapt: p=0.304; species:sal_exp: p=0.621; sal_adapt:sal_exp: p=0.308
+  - species:sal_adapt:sal_exp: p=0.467
+Model R² (selected fit) — marginal=0.243, conditional=0.302
+Post-hoc: skipped (no omnibus terms significant at α=0.05).
+
+
+## μ-DMSP (from DMSPd)
+----------------------
+Diagnostics (auto, no plots):
+Diagnostics for: μ-DMSP (from DMSPd) (DMSPd @ t24)
+  n(resid)=24; Shapiro p=0.0546; skew=-0.15; kurt=0.54
+  Heteroskedasticity — Levene p=0.181; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.011
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.055
+  - Homoskedasticity (Levene across S×A×E): p = 0.181
+Assumptions flagged (α=0.05): none.
+Changes made:
+  - Random intercept singular; dropped RE and used OLS (lm) for inference.
+Inference engine: OLS (lm) — random intercept dropped
+Type-III ANOVA (on inference engine above):
+  - species: p=0.008; sal_adapt: p=0.585; sal_exp: p=9.75e-08
+  - species:sal_adapt: p=0.039; species:sal_exp: p=0.009; sal_adapt:sal_exp: p=0.008
+  - species:sal_adapt:sal_exp: p=0.044
+Model R² (selected fit) — marginal=0.840, conditional=0.840
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -0.011 [-0.020, -0.002]; p=0.018
+  - E25 - E45: -0.015 [-0.024, -0.006]; p=0.003
+  - E25 - E45: -0.015 [-0.024, -0.006]; p=0.003
+  - E25 - E45: -0.037 [-0.046, -0.028]; p=1.95e-07
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.000 [-0.009, 0.009]; p=0.982
+  - Chryso - Polarella: -0.000 [-0.009, 0.009]; p=0.963
+  - Chryso - Polarella: -0.003 [-0.012, 0.006]; p=0.440
+  - Chryso - Polarella: -0.022 [-0.031, -0.013]; p=8.38e-05
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.008 [-0.001, 0.017]; p=0.087
+  - A25 - A45: 0.007 [-0.002, 0.016]; p=0.098
+  - A25 - A45: 0.004 [-0.005, 0.013]; p=0.341
+  - A25 - A45: -0.015 [-0.024, -0.006]; p=0.003
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.000 [-0.015, 0.015]; p=1.000
+  - Chryso A25 E25 - Chryso A45 E25: 0.008 [-0.007, 0.022]; p=0.613
+  - Chryso A25 E25 - Polarella A45 E25: 0.008 [-0.007, 0.022]; p=0.641
+  - Chryso A25 E25 - Chryso A25 E45: -0.011 [-0.026, 0.003]; p=0.211
+  - Chryso A25 E25 - Polarella A25 E45: -0.015 [-0.029, 0.000]; p=0.053
+  - Chryso A25 E25 - Chryso A45 E45: -0.007 [-0.022, 0.008]; p=0.711
+  - Chryso A25 E25 - Polarella A45 E45: -0.029 [-0.044, -0.014]; p=7.99e-05
+  - Polarella A25 E25 - Chryso A45 E25: 0.008 [-0.007, 0.022]; p=0.627
+  - Polarella A25 E25 - Polarella A45 E25: 0.007 [-0.007, 0.022]; p=0.655
+  - Polarella A25 E25 - Chryso A25 E45: -0.011 [-0.026, 0.003]; p=0.204
+  - Polarella A25 E25 - Polarella A25 E45: -0.015 [-0.029, 0.000]; p=0.051
+  - Polarella A25 E25 - Chryso A45 E45: -0.007 [-0.022, 0.008]; p=0.698
+  - Polarella A25 E25 - Polarella A45 E45: -0.029 [-0.044, -0.015]; p=7.69e-05
+  - Chryso A45 E25 - Polarella A45 E25: -0.000 [-0.015, 0.014]; p=1.000
+  - Chryso A45 E25 - Chryso A25 E45: -0.019 [-0.034, -0.004]; p=0.007
+  - Chryso A45 E25 - Polarella A25 E45: -0.022 [-0.037, -0.008]; p=0.002
+  - Chryso A45 E25 - Chryso A45 E45: -0.015 [-0.029, -0.000]; p=0.048
+  - Chryso A45 E25 - Polarella A45 E45: -0.037 [-0.051, -0.022]; p=4.10e-06
+  - Polarella A45 E25 - Chryso A25 E45: -0.019 [-0.033, -0.004]; p=0.008
+  - Polarella A45 E25 - Polarella A25 E45: -0.022 [-0.037, -0.007]; p=0.002
+  - Polarella A45 E25 - Chryso A45 E45: -0.015 [-0.029, 0.000]; p=0.052
+  - Polarella A45 E25 - Polarella A45 E45: -0.037 [-0.051, -0.022]; p=4.41e-06
+  - Chryso A25 E45 - Polarella A25 E45: -0.003 [-0.018, 0.011]; p=0.991
+  - Chryso A25 E45 - Chryso A45 E45: 0.004 [-0.010, 0.019]; p=0.971
+  - Chryso A25 E45 - Polarella A45 E45: -0.018 [-0.033, -0.003]; p=0.011
+  - Polarella A25 E45 - Chryso A45 E45: 0.007 [-0.007, 0.022]; p=0.645
+  - Polarella A25 E45 - Polarella A45 E45: -0.015 [-0.029, 0.000]; p=0.051
+  - Chryso A45 E45 - Polarella A45 E45: -0.022 [-0.037, -0.007]; p=0.002
+
+
+## D3-DMSP taken up
+-------------------
+Diagnostics (auto, no plots):
+Diagnostics for: D3-DMSP taken up (DMS(P)t @ t24)
+  n(resid)=24; Shapiro p=0.537; skew=-0.21; kurt=0.18
+  Heteroskedasticity — Levene p=0.655; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.884
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.537
+  - Homoskedasticity (Levene across S×A×E): p = 0.655
+Assumptions flagged (α=0.05): none.
+Changes made:
+  - Random intercept singular; dropped RE and used OLS (lm) for inference.
+Inference engine: OLS (lm) — random intercept dropped
+Type-III ANOVA (on inference engine above):
+  - species: p=0.004; sal_adapt: p=0.159; sal_exp: p=0.552
+  - species:sal_adapt: p=0.994; species:sal_exp: p=0.344; sal_adapt:sal_exp: p=0.071
+  - species:sal_adapt:sal_exp: p=0.049
+Model R² (selected fit) — marginal=0.504, conditional=0.504
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -10.704 [-36.234, 14.826]; p=0.387
+  - E25 - E45: 26.652 [1.122, 52.181]; p=0.042
+  - E25 - E45: -8.339 [-33.869, 17.190]; p=0.499
+  - E25 - E45: -22.224 [-47.754, 3.305]; p=0.084
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 1.781 [-23.749, 27.311]; p=0.884
+  - Chryso - Polarella: 27.492 [1.962, 53.022]; p=0.036
+  - Chryso - Polarella: 39.137 [13.607, 64.667]; p=0.005
+  - Chryso - Polarella: 13.607 [-11.923, 39.137]; p=0.275
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 7.674 [-17.856, 33.204]; p=0.533
+  - A25 - A45: 33.385 [7.855, 58.915]; p=0.014
+  - A25 - A45: 10.039 [-15.491, 35.569]; p=0.417
+  - A25 - A45: -15.491 [-41.021, 10.039]; p=0.217
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 1.781 [-39.913, 43.475]; p=1.000
+  - Chryso A25 E25 - Chryso A45 E25: 7.674 [-34.020, 49.368]; p=0.998
+  - Chryso A25 E25 - Polarella A45 E25: 35.166 [-6.528, 76.860]; p=0.133
+  - Chryso A25 E25 - Chryso A25 E45: -10.704 [-52.398, 30.990]; p=0.983
+  - Chryso A25 E25 - Polarella A25 E45: 28.433 [-13.262, 70.127]; p=0.322
+  - Chryso A25 E25 - Chryso A45 E45: -0.665 [-42.359, 41.029]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: 12.942 [-28.752, 54.636]; p=0.953
+  - Polarella A25 E25 - Chryso A45 E25: 5.893 [-35.801, 47.587]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E25: 33.385 [-8.309, 75.079]; p=0.170
+  - Polarella A25 E25 - Chryso A25 E45: -12.485 [-54.179, 29.209]; p=0.961
+  - Polarella A25 E25 - Polarella A25 E45: 26.652 [-15.043, 68.346]; p=0.393
+  - Polarella A25 E25 - Chryso A45 E45: -2.446 [-44.141, 39.248]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E45: 11.161 [-30.533, 52.855]; p=0.979
+  - Chryso A45 E25 - Polarella A45 E25: 27.492 [-14.202, 69.186]; p=0.358
+  - Chryso A45 E25 - Chryso A25 E45: -18.378 [-60.073, 23.316]; p=0.784
+  - Chryso A45 E25 - Polarella A25 E45: 20.758 [-20.936, 62.453]; p=0.674
+  - Chryso A45 E25 - Chryso A45 E45: -8.339 [-50.034, 33.355]; p=0.996
+  - Chryso A45 E25 - Polarella A45 E45: 5.268 [-36.427, 46.962]; p=1.000
+  - Polarella A45 E25 - Chryso A25 E45: -45.870 [-87.564, -4.176]; p=0.026
+  - Polarella A45 E25 - Polarella A25 E45: -6.734 [-48.428, 34.961]; p=0.999
+  - Polarella A45 E25 - Chryso A45 E45: -35.831 [-77.526, 5.863]; p=0.121
+  - Polarella A45 E25 - Polarella A45 E45: -22.224 [-63.919, 19.470]; p=0.602
+  - Chryso A25 E45 - Polarella A25 E45: 39.137 [-2.557, 80.831]; p=0.074
+  - Chryso A25 E45 - Chryso A45 E45: 10.039 [-31.655, 51.733]; p=0.988
+  - Chryso A25 E45 - Polarella A45 E45: 23.646 [-18.048, 65.340]; p=0.532
+  - Polarella A25 E45 - Chryso A45 E45: -29.098 [-70.792, 12.596]; p=0.297
+  - Polarella A25 E45 - Polarella A45 E45: -15.491 [-57.185, 26.203]; p=0.891
+  - Chryso A45 E45 - Polarella A45 E45: 13.607 [-28.087, 55.301]; p=0.940
+
+
+## D3-DMSP lost (demethylated)
+------------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: D3-DMSP lost (demethylated) (DMS(P)t @ t24)
+  n(resid)=24; Shapiro p=0.973; skew=0.11; kurt=-0.10
+  Heteroskedasticity — Levene p=0.662; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.016
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.973
+  - Homoskedasticity (Levene across S×A×E): p = 0.662
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=1.15e-04; sal_adapt: p=0.149; sal_exp: p=0.062
+  - species:sal_adapt: p=0.606; species:sal_exp: p=0.973; sal_adapt:sal_exp: p=0.128
+  - species:sal_adapt:sal_exp: p=0.004
+Model R² (selected fit) — marginal=0.584, conditional=0.702
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -2.762 [-27.407, 21.882]; p=0.803
+  - E25 - E45: -33.472 [-58.117, -8.827]; p=0.014
+  - E25 - E45: -17.570 [-42.215, 7.075]; p=0.139
+  - E25 - E45: 13.872 [-10.773, 38.516]; p=0.230
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: -8.510 [-35.430, 18.410]; p=0.510
+  - Chryso - Polarella: -46.948 [-73.868, -20.027]; p=0.002
+  - Chryso - Polarella: -39.220 [-66.140, -12.299]; p=0.007
+  - Chryso - Polarella: -15.506 [-42.426, 11.414]; p=0.238
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.772 [-26.148, 27.692]; p=0.952
+  - A25 - A45: -37.666 [-64.586, -10.746]; p=0.009
+  - A25 - A45: -14.036 [-40.956, 12.884]; p=0.284
+  - A25 - A45: 9.678 [-17.242, 36.598]; p=0.455
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: -8.510 [-52.657, 35.637]; p=0.997
+  - Chryso A25 E25 - Chryso A45 E25: 0.772 [-43.375, 44.918]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E25: -46.176 [-90.322, -2.029]; p=0.037
+  - Chryso A25 E25 - Chryso A25 E45: -2.762 [-45.053, 39.528]; p=1.000
+  - Chryso A25 E25 - Polarella A25 E45: -41.982 [-86.129, 2.165]; p=0.068
+  - Chryso A25 E25 - Chryso A45 E45: -16.798 [-60.945, 27.349]; p=0.873
+  - Chryso A25 E25 - Polarella A45 E45: -32.304 [-76.451, 11.843]; p=0.244
+  - Polarella A25 E25 - Chryso A45 E25: 9.282 [-34.865, 53.428]; p=0.994
+  - Polarella A25 E25 - Polarella A45 E25: -37.666 [-81.812, 6.481]; p=0.123
+  - Polarella A25 E25 - Chryso A25 E45: 5.748 [-38.399, 49.894]; p=1.000
+  - Polarella A25 E25 - Polarella A25 E45: -33.472 [-75.762, 8.818]; p=0.143
+  - Polarella A25 E25 - Chryso A45 E45: -8.288 [-52.435, 35.859]; p=0.997
+  - Polarella A25 E25 - Polarella A45 E45: -23.794 [-67.941, 20.352]; p=0.579
+  - Chryso A45 E25 - Polarella A45 E25: -46.948 [-91.094, -2.801]; p=0.033
+  - Chryso A45 E25 - Chryso A25 E45: -3.534 [-47.681, 40.612]; p=1.000
+  - Chryso A45 E25 - Polarella A25 E45: -42.754 [-86.900, 1.393]; p=0.061
+  - Chryso A45 E25 - Chryso A45 E45: -17.570 [-59.860, 24.720]; p=0.718
+  - Chryso A45 E25 - Polarella A45 E45: -33.076 [-77.223, 11.071]; p=0.222
+  - Polarella A45 E25 - Chryso A25 E45: 43.413 [-0.733, 87.560]; p=0.056
+  - Polarella A45 E25 - Polarella A25 E45: 4.194 [-39.953, 48.340]; p=1.000
+  - Polarella A45 E25 - Chryso A45 E45: 29.378 [-14.769, 73.524]; p=0.340
+  - Polarella A45 E25 - Polarella A45 E45: 13.872 [-28.419, 56.162]; p=0.877
+  - Chryso A25 E45 - Polarella A25 E45: -39.220 [-83.366, 4.927]; p=0.100
+  - Chryso A25 E45 - Chryso A45 E45: -14.036 [-58.182, 30.111]; p=0.944
+  - Chryso A25 E45 - Polarella A45 E45: -29.542 [-73.688, 14.605]; p=0.334
+  - Polarella A25 E45 - Chryso A45 E45: 25.184 [-18.963, 69.331]; p=0.515
+  - Polarella A25 E45 - Polarella A45 E45: 9.678 [-34.469, 53.824]; p=0.993
+  - Chryso A45 E45 - Polarella A45 E45: -15.506 [-59.653, 28.641]; p=0.910
+
+
+## μ-DMSP / μ-POC (direct)
+--------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: μ-DMSP / μ-POC (direct) (Normalized @ t24)
+  n(resid)=21; Shapiro p=0.000367; skew=1.09; kurt=1.65
+  Heteroskedasticity — Levene p=0.522; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.000151
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 3.67e-04
+  - Homoskedasticity (Levene across S×A×E): p = 0.522
+Assumptions flagged (α=0.05): Normality (p=3.67e-04)
+Changes made:
+  - Normality flagged; retained scale (no positive-only transform justified).
+  - Random intercept singular; dropped RE and used OLS (lm) for inference.
+Inference engine: OLS (lm) — random intercept dropped
+Type-III ANOVA (on inference engine above):
+  - species: p=2.16e-06; sal_adapt: p=0.925; sal_exp: p=3.00e-04
+  - species:sal_adapt: p=0.127; species:sal_exp: p=0.005; sal_adapt:sal_exp: p=0.210
+  - species:sal_adapt:sal_exp: p=0.456
+Model R² (selected fit) — marginal=0.869, conditional=0.869
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -1.625 [-4.649, 1.399]; p=0.267
+  - E25 - E45: -8.316 [-11.340, -5.292]; p=4.89e-05
+  - E25 - E45: -0.745 [-4.126, 2.635]; p=0.642
+  - E25 - E45: -4.970 [-9.246, -0.694]; p=0.026
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: -1.780 [-4.804, 1.243]; p=0.226
+  - Chryso - Polarella: -5.631 [-9.908, -1.355]; p=0.014
+  - Chryso - Polarella: -8.471 [-11.495, -5.447]; p=4.08e-05
+  - Chryso - Polarella: -9.856 [-13.237, -6.475]; p=2.75e-05
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.793 [-2.231, 3.816]; p=0.581
+  - A25 - A45: -3.058 [-7.335, 1.218]; p=0.146
+  - A25 - A45: 1.672 [-1.708, 5.053]; p=0.305
+  - A25 - A45: 0.287 [-2.736, 3.311]; p=0.840
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: -1.780 [-6.777, 3.217]; p=0.894
+  - Chryso A25 E25 - Chryso A45 E25: 0.793 [-4.204, 5.790]; p=0.999
+  - Chryso A25 E25 - Polarella A45 E25: -4.839 [-11.906, 2.228]; p=0.297
+  - Chryso A25 E25 - Chryso A25 E45: -1.625 [-6.622, 3.372]; p=0.930
+  - Chryso A25 E25 - Polarella A25 E45: -10.096 [-15.093, -5.099]; p=1.35e-04
+  - Chryso A25 E25 - Chryso A45 E45: 0.047 [-5.540, 5.634]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: -9.809 [-14.806, -4.812]; p=1.82e-04
+  - Polarella A25 E25 - Chryso A45 E25: 2.573 [-2.424, 7.570]; p=0.609
+  - Polarella A25 E25 - Polarella A45 E25: -3.058 [-10.125, 4.009]; p=0.772
+  - Polarella A25 E25 - Chryso A25 E45: 0.155 [-4.842, 5.152]; p=1.000
+  - Polarella A25 E25 - Polarella A25 E45: -8.316 [-13.313, -3.319]; p=9.24e-04
+  - Polarella A25 E25 - Chryso A45 E45: 1.828 [-3.759, 7.415]; p=0.928
+  - Polarella A25 E25 - Polarella A45 E45: -8.028 [-13.025, -3.031]; p=0.001
+  - Chryso A45 E25 - Polarella A45 E25: -5.631 [-12.698, 1.436]; p=0.165
+  - Chryso A45 E25 - Chryso A25 E45: -2.418 [-7.415, 2.579]; p=0.672
+  - Chryso A45 E25 - Polarella A25 E45: -10.889 [-15.886, -5.892]; p=6.11e-05
+  - Chryso A45 E25 - Chryso A45 E45: -0.745 [-6.332, 4.842]; p=1.000
+  - Chryso A45 E25 - Polarella A45 E45: -10.601 [-15.599, -5.604]; p=8.11e-05
+  - Polarella A45 E25 - Chryso A25 E45: 3.214 [-3.853, 10.281]; p=0.730
+  - Polarella A45 E25 - Polarella A25 E45: -5.257 [-12.324, 1.809]; p=0.219
+  - Polarella A45 E25 - Chryso A45 E45: 4.886 [-2.610, 12.382]; p=0.348
+  - Polarella A45 E25 - Polarella A45 E45: -4.970 [-12.037, 2.097]; p=0.271
+  - Chryso A25 E45 - Polarella A25 E45: -8.471 [-13.468, -3.474]; p=7.76e-04
+  - Chryso A25 E45 - Chryso A45 E45: 1.672 [-3.915, 7.259]; p=0.953
+  - Chryso A25 E45 - Polarella A45 E45: -8.184 [-13.181, -3.187]; p=0.001
+  - Polarella A25 E45 - Chryso A45 E45: 10.144 [4.557, 15.730]; p=3.99e-04
+  - Polarella A25 E45 - Polarella A45 E45: 0.287 [-4.710, 5.285]; p=1.000
+  - Chryso A45 E45 - Polarella A45 E45: -9.856 [-15.443, -4.269]; p=5.29e-04
+
+
+## DMSP-C : POC (mol:mol)
+-------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: DMSP-C : POC (mol:mol) (Normalized @ t24)
+  n(resid)=20; Shapiro p=0.015; skew=-0.20; kurt=1.39
+  Heteroskedasticity — Levene p=0.385; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.164
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.015
+  - Homoskedasticity (Levene across S×A×E): p = 0.385
+Assumptions flagged (α=0.05): Normality (p=0.015)
+Changes made:
+  - Normality flagged; retained scale (no positive-only transform justified).
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=3.37e-25; sal_adapt: p=0.031; sal_exp: p=0.029
+  - species:sal_adapt: p=8.63e-05; species:sal_exp: p=0.002; sal_adapt:sal_exp: p=0.524
+  - species:sal_adapt:sal_exp: p=0.341
+Model R² (selected fit) — marginal=0.905, conditional=0.956
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -0.702 [-1.251, -0.152]; p=0.024
+  - E25 - E45: 0.312 [-0.330, 0.954]; p=0.264
+  - E25 - E45: -0.622 [-1.264, 0.020]; p=0.055
+  - E25 - E45: -0.089 [-0.955, 0.777]; p=0.808
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.774 [0.117, 1.431]; p=0.025
+  - Chryso - Polarella: 2.573 [1.676, 3.471]; p=4.42e-05
+  - Chryso - Polarella: 1.787 [1.067, 2.507]; p=1.80e-04
+  - Chryso - Polarella: 3.107 [2.387, 3.827]; p=9.80e-07
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: -1.248 [-1.905, -0.591]; p=0.002
+  - A25 - A45: 0.552 [-0.345, 1.449]; p=0.205
+  - A25 - A45: -1.169 [-1.888, -0.449]; p=0.004
+  - A25 - A45: 0.152 [-0.568, 0.871]; p=0.653
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.774 [-0.331, 1.878]; p=0.251
+  - Chryso A25 E25 - Chryso A45 E25: -1.248 [-2.352, -0.143]; p=0.024
+  - Chryso A25 E25 - Polarella A45 E25: 1.326 [-0.166, 2.817]; p=0.096
+  - Chryso A25 E25 - Chryso A25 E45: -0.702 [-1.724, 0.321]; p=0.165
+  - Chryso A25 E25 - Polarella A25 E45: 1.085 [-0.115, 2.285]; p=0.087
+  - Chryso A25 E25 - Chryso A45 E45: -1.870 [-3.070, -0.670]; p=0.002
+  - Chryso A25 E25 - Polarella A45 E45: 1.237 [0.132, 2.341]; p=0.026
+  - Polarella A25 E25 - Chryso A45 E25: -2.021 [-3.126, -0.917]; p=7.03e-04
+  - Polarella A25 E25 - Polarella A45 E25: 0.552 [-0.940, 2.044]; p=0.866
+  - Polarella A25 E25 - Chryso A25 E45: -1.475 [-2.580, -0.371]; p=0.008
+  - Polarella A25 E25 - Polarella A25 E45: 0.312 [-0.858, 1.482]; p=0.879
+  - Polarella A25 E25 - Chryso A45 E45: -2.644 [-3.844, -1.444]; p=9.29e-05
+  - Polarella A25 E25 - Polarella A45 E45: 0.463 [-0.641, 1.568]; p=0.759
+  - Chryso A45 E25 - Polarella A45 E25: 2.573 [1.082, 4.065]; p=8.08e-04
+  - Chryso A45 E25 - Chryso A25 E45: 0.546 [-0.558, 1.651]; p=0.607
+  - Chryso A45 E25 - Polarella A25 E45: 2.333 [1.133, 3.533]; p=3.03e-04
+  - Chryso A45 E25 - Chryso A45 E45: -0.622 [-1.792, 0.548]; p=0.353
+  - Chryso A45 E25 - Polarella A45 E45: 2.485 [1.380, 3.589]; p=1.19e-04
+  - Polarella A45 E25 - Chryso A25 E45: -2.027 [-3.519, -0.535]; p=0.006
+  - Polarella A45 E25 - Polarella A25 E45: -0.240 [-1.825, 1.344]; p=0.999
+  - Polarella A45 E25 - Chryso A45 E45: -3.196 [-4.780, -1.611]; p=1.99e-04
+  - Polarella A45 E25 - Polarella A45 E45: -0.089 [-1.631, 1.454]; p=1.000
+  - Chryso A25 E45 - Polarella A25 E45: 1.787 [0.587, 2.987]; p=0.003
+  - Chryso A25 E45 - Chryso A45 E45: -1.169 [-2.369, 0.031]; p=0.058
+  - Chryso A25 E45 - Polarella A45 E45: 1.938 [0.834, 3.043]; p=9.92e-04
+  - Polarella A25 E45 - Chryso A45 E45: -2.955 [-4.254, -1.657]; p=5.61e-05
+  - Polarella A25 E45 - Polarella A45 E45: 0.152 [-1.049, 1.352]; p=1.000
+  - Chryso A45 E45 - Polarella A45 E45: 3.107 [1.907, 4.307]; p=1.89e-05
+
+
+## Tracer uptake (d3_p_taken_up)
+--------------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: Tracer uptake (d3_p_taken_up) (Normalized @ t24)
+  n(resid)=24; Shapiro p=0.537; skew=-0.21; kurt=0.18
+  Heteroskedasticity — Levene p=0.655; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.884
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.537
+  - Homoskedasticity (Levene across S×A×E): p = 0.655
+Assumptions flagged (α=0.05): none.
+Changes made:
+  - Random intercept singular; dropped RE and used OLS (lm) for inference.
+Inference engine: OLS (lm) — random intercept dropped
+Type-III ANOVA (on inference engine above):
+  - species: p=0.004; sal_adapt: p=0.159; sal_exp: p=0.552
+  - species:sal_adapt: p=0.994; species:sal_exp: p=0.344; sal_adapt:sal_exp: p=0.071
+  - species:sal_adapt:sal_exp: p=0.049
+Model R² (selected fit) — marginal=0.504, conditional=0.504
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -10.704 [-36.234, 14.826]; p=0.387
+  - E25 - E45: 26.652 [1.122, 52.181]; p=0.042
+  - E25 - E45: -8.339 [-33.869, 17.190]; p=0.499
+  - E25 - E45: -22.224 [-47.754, 3.305]; p=0.084
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 1.781 [-23.749, 27.311]; p=0.884
+  - Chryso - Polarella: 27.492 [1.962, 53.022]; p=0.036
+  - Chryso - Polarella: 39.137 [13.607, 64.667]; p=0.005
+  - Chryso - Polarella: 13.607 [-11.923, 39.137]; p=0.275
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 7.674 [-17.856, 33.204]; p=0.533
+  - A25 - A45: 33.385 [7.855, 58.915]; p=0.014
+  - A25 - A45: 10.039 [-15.491, 35.569]; p=0.417
+  - A25 - A45: -15.491 [-41.021, 10.039]; p=0.217
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 1.781 [-39.913, 43.475]; p=1.000
+  - Chryso A25 E25 - Chryso A45 E25: 7.674 [-34.020, 49.368]; p=0.998
+  - Chryso A25 E25 - Polarella A45 E25: 35.166 [-6.528, 76.860]; p=0.133
+  - Chryso A25 E25 - Chryso A25 E45: -10.704 [-52.398, 30.990]; p=0.983
+  - Chryso A25 E25 - Polarella A25 E45: 28.433 [-13.262, 70.127]; p=0.322
+  - Chryso A25 E25 - Chryso A45 E45: -0.665 [-42.359, 41.029]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: 12.942 [-28.752, 54.636]; p=0.953
+  - Polarella A25 E25 - Chryso A45 E25: 5.893 [-35.801, 47.587]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E25: 33.385 [-8.309, 75.079]; p=0.170
+  - Polarella A25 E25 - Chryso A25 E45: -12.485 [-54.179, 29.209]; p=0.961
+  - Polarella A25 E25 - Polarella A25 E45: 26.652 [-15.043, 68.346]; p=0.393
+  - Polarella A25 E25 - Chryso A45 E45: -2.446 [-44.141, 39.248]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E45: 11.161 [-30.533, 52.855]; p=0.979
+  - Chryso A45 E25 - Polarella A45 E25: 27.492 [-14.202, 69.186]; p=0.358
+  - Chryso A45 E25 - Chryso A25 E45: -18.378 [-60.073, 23.316]; p=0.784
+  - Chryso A45 E25 - Polarella A25 E45: 20.758 [-20.936, 62.453]; p=0.674
+  - Chryso A45 E25 - Chryso A45 E45: -8.339 [-50.034, 33.355]; p=0.996
+  - Chryso A45 E25 - Polarella A45 E45: 5.268 [-36.427, 46.962]; p=1.000
+  - Polarella A45 E25 - Chryso A25 E45: -45.870 [-87.564, -4.176]; p=0.026
+  - Polarella A45 E25 - Polarella A25 E45: -6.734 [-48.428, 34.961]; p=0.999
+  - Polarella A45 E25 - Chryso A45 E45: -35.831 [-77.526, 5.863]; p=0.121
+  - Polarella A45 E25 - Polarella A45 E45: -22.224 [-63.919, 19.470]; p=0.602
+  - Chryso A25 E45 - Polarella A25 E45: 39.137 [-2.557, 80.831]; p=0.074
+  - Chryso A25 E45 - Chryso A45 E45: 10.039 [-31.655, 51.733]; p=0.988
+  - Chryso A25 E45 - Polarella A45 E45: 23.646 [-18.048, 65.340]; p=0.532
+  - Polarella A25 E45 - Chryso A45 E45: -29.098 [-70.792, 12.596]; p=0.297
+  - Polarella A25 E45 - Polarella A45 E45: -15.491 [-57.185, 26.203]; p=0.891
+  - Chryso A45 E45 - Polarella A45 E45: 13.607 [-28.087, 55.301]; p=0.940
+
+
+## Tracer loss (d3_p_lost_demethylated)
+---------------------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: Tracer loss (d3_p_lost_demethylated) (Normalized @ t24)
+  n(resid)=24; Shapiro p=0.973; skew=0.11; kurt=-0.10
+  Heteroskedasticity — Levene p=0.662; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.016
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.973
+  - Homoskedasticity (Levene across S×A×E): p = 0.662
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=1.15e-04; sal_adapt: p=0.149; sal_exp: p=0.062
+  - species:sal_adapt: p=0.606; species:sal_exp: p=0.973; sal_adapt:sal_exp: p=0.128
+  - species:sal_adapt:sal_exp: p=0.004
+Model R² (selected fit) — marginal=0.584, conditional=0.702
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -2.762 [-27.407, 21.882]; p=0.803
+  - E25 - E45: -33.472 [-58.117, -8.827]; p=0.014
+  - E25 - E45: -17.570 [-42.215, 7.075]; p=0.139
+  - E25 - E45: 13.872 [-10.773, 38.516]; p=0.230
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: -8.510 [-35.430, 18.410]; p=0.510
+  - Chryso - Polarella: -46.948 [-73.868, -20.027]; p=0.002
+  - Chryso - Polarella: -39.220 [-66.140, -12.299]; p=0.007
+  - Chryso - Polarella: -15.506 [-42.426, 11.414]; p=0.238
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.772 [-26.148, 27.692]; p=0.952
+  - A25 - A45: -37.666 [-64.586, -10.746]; p=0.009
+  - A25 - A45: -14.036 [-40.956, 12.884]; p=0.284
+  - A25 - A45: 9.678 [-17.242, 36.598]; p=0.455
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: -8.510 [-52.657, 35.637]; p=0.997
+  - Chryso A25 E25 - Chryso A45 E25: 0.772 [-43.375, 44.918]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E25: -46.176 [-90.322, -2.029]; p=0.037
+  - Chryso A25 E25 - Chryso A25 E45: -2.762 [-45.053, 39.528]; p=1.000
+  - Chryso A25 E25 - Polarella A25 E45: -41.982 [-86.129, 2.165]; p=0.068
+  - Chryso A25 E25 - Chryso A45 E45: -16.798 [-60.945, 27.349]; p=0.873
+  - Chryso A25 E25 - Polarella A45 E45: -32.304 [-76.451, 11.843]; p=0.244
+  - Polarella A25 E25 - Chryso A45 E25: 9.282 [-34.865, 53.428]; p=0.994
+  - Polarella A25 E25 - Polarella A45 E25: -37.666 [-81.812, 6.481]; p=0.123
+  - Polarella A25 E25 - Chryso A25 E45: 5.748 [-38.399, 49.894]; p=1.000
+  - Polarella A25 E25 - Polarella A25 E45: -33.472 [-75.762, 8.818]; p=0.143
+  - Polarella A25 E25 - Chryso A45 E45: -8.288 [-52.435, 35.859]; p=0.997
+  - Polarella A25 E25 - Polarella A45 E45: -23.794 [-67.941, 20.352]; p=0.579
+  - Chryso A45 E25 - Polarella A45 E25: -46.948 [-91.094, -2.801]; p=0.033
+  - Chryso A45 E25 - Chryso A25 E45: -3.534 [-47.681, 40.612]; p=1.000
+  - Chryso A45 E25 - Polarella A25 E45: -42.754 [-86.900, 1.393]; p=0.061
+  - Chryso A45 E25 - Chryso A45 E45: -17.570 [-59.860, 24.720]; p=0.718
+  - Chryso A45 E25 - Polarella A45 E45: -33.076 [-77.223, 11.071]; p=0.222
+  - Polarella A45 E25 - Chryso A25 E45: 43.413 [-0.733, 87.560]; p=0.056
+  - Polarella A45 E25 - Polarella A25 E45: 4.194 [-39.953, 48.340]; p=1.000
+  - Polarella A45 E25 - Chryso A45 E45: 29.378 [-14.769, 73.524]; p=0.340
+  - Polarella A45 E25 - Polarella A45 E45: 13.872 [-28.419, 56.162]; p=0.877
+  - Chryso A25 E45 - Polarella A25 E45: -39.220 [-83.366, 4.927]; p=0.100
+  - Chryso A25 E45 - Chryso A45 E45: -14.036 [-58.182, 30.111]; p=0.944
+  - Chryso A25 E45 - Polarella A45 E45: -29.542 [-73.688, 14.605]; p=0.334
+  - Polarella A25 E45 - Chryso A45 E45: 25.184 [-18.963, 69.331]; p=0.515
+  - Polarella A25 E45 - Polarella A45 E45: 9.678 [-34.469, 53.824]; p=0.993
+  - Chryso A45 E45 - Polarella A45 E45: -15.506 [-59.653, 28.641]; p=0.910
+
+
+## μ-DMSP (from DMSPd; direct)
+------------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: μ-DMSP (from DMSPd; direct) (Normalized @ t24)
+  n(resid)=24; Shapiro p=0.0546; skew=-0.15; kurt=0.54
+  Heteroskedasticity — Levene p=0.181; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.011
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.055
+  - Homoskedasticity (Levene across S×A×E): p = 0.181
+Assumptions flagged (α=0.05): none.
+Changes made:
+  - Random intercept singular; dropped RE and used OLS (lm) for inference.
+Inference engine: OLS (lm) — random intercept dropped
+Type-III ANOVA (on inference engine above):
+  - species: p=0.008; sal_adapt: p=0.585; sal_exp: p=9.75e-08
+  - species:sal_adapt: p=0.039; species:sal_exp: p=0.009; sal_adapt:sal_exp: p=0.008
+  - species:sal_adapt:sal_exp: p=0.044
+Model R² (selected fit) — marginal=0.840, conditional=0.840
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -0.011 [-0.020, -0.002]; p=0.018
+  - E25 - E45: -0.015 [-0.024, -0.006]; p=0.003
+  - E25 - E45: -0.015 [-0.024, -0.006]; p=0.003
+  - E25 - E45: -0.037 [-0.046, -0.028]; p=1.95e-07
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.000 [-0.009, 0.009]; p=0.982
+  - Chryso - Polarella: -0.000 [-0.009, 0.009]; p=0.963
+  - Chryso - Polarella: -0.003 [-0.012, 0.006]; p=0.440
+  - Chryso - Polarella: -0.022 [-0.031, -0.013]; p=8.38e-05
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.008 [-0.001, 0.017]; p=0.087
+  - A25 - A45: 0.007 [-0.002, 0.016]; p=0.098
+  - A25 - A45: 0.004 [-0.005, 0.013]; p=0.341
+  - A25 - A45: -0.015 [-0.024, -0.006]; p=0.003
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.000 [-0.015, 0.015]; p=1.000
+  - Chryso A25 E25 - Chryso A45 E25: 0.008 [-0.007, 0.022]; p=0.613
+  - Chryso A25 E25 - Polarella A45 E25: 0.008 [-0.007, 0.022]; p=0.641
+  - Chryso A25 E25 - Chryso A25 E45: -0.011 [-0.026, 0.003]; p=0.211
+  - Chryso A25 E25 - Polarella A25 E45: -0.015 [-0.029, 0.000]; p=0.053
+  - Chryso A25 E25 - Chryso A45 E45: -0.007 [-0.022, 0.008]; p=0.711
+  - Chryso A25 E25 - Polarella A45 E45: -0.029 [-0.044, -0.014]; p=7.99e-05
+  - Polarella A25 E25 - Chryso A45 E25: 0.008 [-0.007, 0.022]; p=0.627
+  - Polarella A25 E25 - Polarella A45 E25: 0.007 [-0.007, 0.022]; p=0.655
+  - Polarella A25 E25 - Chryso A25 E45: -0.011 [-0.026, 0.003]; p=0.204
+  - Polarella A25 E25 - Polarella A25 E45: -0.015 [-0.029, 0.000]; p=0.051
+  - Polarella A25 E25 - Chryso A45 E45: -0.007 [-0.022, 0.008]; p=0.698
+  - Polarella A25 E25 - Polarella A45 E45: -0.029 [-0.044, -0.015]; p=7.69e-05
+  - Chryso A45 E25 - Polarella A45 E25: -0.000 [-0.015, 0.014]; p=1.000
+  - Chryso A45 E25 - Chryso A25 E45: -0.019 [-0.034, -0.004]; p=0.007
+  - Chryso A45 E25 - Polarella A25 E45: -0.022 [-0.037, -0.008]; p=0.002
+  - Chryso A45 E25 - Chryso A45 E45: -0.015 [-0.029, -0.000]; p=0.048
+  - Chryso A45 E25 - Polarella A45 E45: -0.037 [-0.051, -0.022]; p=4.10e-06
+  - Polarella A45 E25 - Chryso A25 E45: -0.019 [-0.033, -0.004]; p=0.008
+  - Polarella A45 E25 - Polarella A25 E45: -0.022 [-0.037, -0.007]; p=0.002
+  - Polarella A45 E25 - Chryso A45 E45: -0.015 [-0.029, 0.000]; p=0.052
+  - Polarella A45 E25 - Polarella A45 E45: -0.037 [-0.051, -0.022]; p=4.41e-06
+  - Chryso A25 E45 - Polarella A25 E45: -0.003 [-0.018, 0.011]; p=0.991
+  - Chryso A25 E45 - Chryso A45 E45: 0.004 [-0.010, 0.019]; p=0.971
+  - Chryso A25 E45 - Polarella A45 E45: -0.018 [-0.033, -0.003]; p=0.011
+  - Polarella A25 E45 - Chryso A45 E45: 0.007 [-0.007, 0.022]; p=0.645
+  - Polarella A25 E45 - Polarella A45 E45: -0.015 [-0.029, 0.000]; p=0.051
+  - Chryso A45 E45 - Polarella A45 E45: -0.022 [-0.037, -0.007]; p=0.002
+
+
+## Uptake (% of DMSPp)
+----------------------
+Diagnostics (auto, no plots):
+Diagnostics for: Uptake (% of DMSPp) (DMSPp @ t24)
+  n(resid)=22; Shapiro p=0.0382; skew=-0.53; kurt=2.19
+  Heteroskedasticity — Levene p=0.159; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.0721
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.038
+  - Homoskedasticity (Levene across S×A×E): p = 0.159
+Assumptions flagged (α=0.05): Normality (p=0.038)
+Changes made:
+  - Normality flagged; retained scale (no positive-only transform justified).
+  - Random intercept singular; dropped RE and used OLS (lm) for inference.
+Inference engine: OLS (lm) — random intercept dropped
+Type-III ANOVA (on inference engine above):
+  - species: p=8.52e-13; sal_adapt: p=0.211; sal_exp: p=4.06e-05
+  - species:sal_adapt: p=6.95e-05; species:sal_exp: p=1.40e-05; sal_adapt:sal_exp: p=0.444
+  - species:sal_adapt:sal_exp: p=0.976
+Model R² (selected fit) — marginal=0.972, conditional=0.972
+Post-hoc (E within species × acclimation):
+  - E25 - E45: 0.819 [-1.473, 3.111]; p=0.456
+  - E25 - E45: -6.583 [-9.146, -4.020]; p=7.69e-05
+  - E25 - E45: -0.108 [-2.400, 2.184]; p=0.921
+  - E25 - E45: -7.441 [-10.003, -4.878]; p=2.21e-05
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: -6.797 [-9.089, -4.505]; p=1.77e-05
+  - Chryso - Polarella: -13.142 [-15.705, -10.579]; p=2.84e-08
+  - Chryso - Polarella: -14.200 [-16.762, -11.637]; p=1.06e-08
+  - Chryso - Polarella: -20.475 [-22.767, -18.183]; p=1.93e-11
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 2.876 [0.584, 5.169]; p=0.018
+  - A25 - A45: -3.469 [-6.031, -0.906]; p=0.012
+  - A25 - A45: 1.949 [-0.343, 4.242]; p=0.090
+  - A25 - A45: -4.326 [-6.889, -1.763]; p=0.003
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: -6.797 [-10.569, -3.026]; p=3.54e-04
+  - Chryso A25 E25 - Chryso A45 E25: 2.876 [-0.895, 6.648]; p=0.203
+  - Chryso A25 E25 - Polarella A45 E25: -10.266 [-14.482, -6.049]; p=1.26e-05
+  - Chryso A25 E25 - Chryso A25 E45: 0.819 [-2.952, 4.590]; p=0.992
+  - Chryso A25 E25 - Polarella A25 E45: -13.380 [-17.597, -9.164]; p=4.95e-07
+  - Chryso A25 E25 - Chryso A45 E45: 2.769 [-1.003, 6.540]; p=0.237
+  - Chryso A25 E25 - Polarella A45 E45: -17.706 [-21.478, -13.935]; p=2.88e-09
+  - Polarella A25 E25 - Chryso A45 E25: 9.674 [5.902, 13.445]; p=6.77e-06
+  - Polarella A25 E25 - Polarella A45 E25: -3.469 [-7.685, 0.748]; p=0.145
+  - Polarella A25 E25 - Chryso A25 E45: 7.616 [3.845, 11.388]; p=1.05e-04
+  - Polarella A25 E25 - Polarella A25 E45: -6.583 [-10.800, -2.367]; p=0.001
+  - Polarella A25 E25 - Chryso A45 E45: 9.566 [5.794, 13.337]; p=7.74e-06
+  - Polarella A25 E25 - Polarella A45 E45: -10.909 [-14.680, -7.138]; p=1.57e-06
+  - Chryso A45 E25 - Polarella A45 E25: -13.142 [-17.359, -8.926]; p=6.21e-07
+  - Chryso A45 E25 - Chryso A25 E45: -2.057 [-5.829, 1.714]; p=0.557
+  - Chryso A45 E25 - Polarella A25 E45: -16.257 [-20.473, -12.040]; p=4.09e-08
+  - Chryso A45 E25 - Chryso A45 E45: -0.108 [-3.879, 3.663]; p=1.000
+  - Chryso A45 E25 - Polarella A45 E45: -20.583 [-24.354, -16.812]; p=4.42e-10
+  - Polarella A45 E25 - Chryso A25 E45: 11.085 [6.868, 15.301]; p=5.04e-06
+  - Polarella A45 E25 - Polarella A25 E45: -3.115 [-7.734, 1.504]; p=0.320
+  - Polarella A45 E25 - Chryso A45 E45: 13.034 [8.818, 17.251]; p=6.88e-07
+  - Polarella A45 E25 - Polarella A45 E45: -7.441 [-11.657, -3.224]; p=4.39e-04
+  - Chryso A25 E45 - Polarella A25 E45: -14.200 [-18.416, -9.983]; p=2.34e-07
+  - Chryso A25 E45 - Chryso A45 E45: 1.949 [-1.822, 5.721]; p=0.616
+  - Chryso A25 E45 - Polarella A45 E45: -18.526 [-22.297, -14.754]; p=1.60e-09
+  - Polarella A25 E45 - Chryso A45 E45: 16.149 [11.933, 20.365]; p=4.47e-08
+  - Polarella A25 E45 - Polarella A45 E45: -4.326 [-8.542, -0.109]; p=0.043
+  - Chryso A45 E45 - Polarella A45 E45: -20.475 [-24.246, -16.704]; p=4.70e-10
+
+
+## DMSP uptake of total DMSP
+----------------------------
+Analysis failed: there are aliased coefficients in the model
+
+
+## DMSP uptake-C : POC (mol:mol)
+--------------------------------
+Diagnostics (auto, no plots):
+Diagnostics for: DMSP uptake-C : POC (mol:mol) (DMSPp @ t24)
+  n(resid)=20; Shapiro p=0.877; skew=0.05; kurt=-0.80
+  Heteroskedasticity — Levene p=0.181; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.12
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.877
+  - Homoskedasticity (Levene across S×A×E): p = 0.181
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=0.521; sal_adapt: p=2.33e-04; sal_exp: p=1.93e-04
+  - species:sal_adapt: p=0.130; species:sal_exp: p=0.783; sal_adapt:sal_exp: p=0.016
+  - species:sal_adapt:sal_exp: p=0.035
+Model R² (selected fit) — marginal=0.571, conditional=0.808
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -0.016 [-0.038, 0.006]; p=0.116
+  - E25 - E45: 0.003 [-0.023, 0.029]; p=0.802
+  - E25 - E45: -0.019 [-0.045, 0.007]; p=0.116
+  - E25 - E45: -0.044 [-0.079, -0.008]; p=0.024
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: -0.017 [-0.044, 0.011]; p=0.204
+  - Chryso - Polarella: 0.030 [-0.007, 0.067]; p=0.101
+  - Chryso - Polarella: 0.002 [-0.027, 0.032]; p=0.871
+  - Chryso - Polarella: 0.005 [-0.024, 0.035]; p=0.692
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.019 [-0.008, 0.046]; p=0.144
+  - A25 - A45: 0.066 [0.029, 0.102]; p=0.002
+  - A25 - A45: 0.016 [-0.013, 0.046]; p=0.254
+  - A25 - A45: 0.019 [-0.010, 0.049]; p=0.177
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: -0.017 [-0.062, 0.029]; p=0.856
+  - Chryso A25 E25 - Chryso A45 E25: 0.019 [-0.026, 0.065]; p=0.750
+  - Chryso A25 E25 - Polarella A45 E25: 0.049 [-0.012, 0.110]; p=0.153
+  - Chryso A25 E25 - Chryso A25 E45: -0.016 [-0.058, 0.025]; p=0.570
+  - Chryso A25 E25 - Polarella A25 E45: -0.014 [-0.063, 0.035]; p=0.960
+  - Chryso A25 E25 - Chryso A45 E45: 0.000 [-0.049, 0.049]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: 0.006 [-0.040, 0.051]; p=1.000
+  - Polarella A25 E25 - Chryso A45 E25: 0.036 [-0.010, 0.081]; p=0.160
+  - Polarella A25 E25 - Polarella A45 E25: 0.066 [0.005, 0.127]; p=0.032
+  - Polarella A25 E25 - Chryso A25 E45: 0.000 [-0.045, 0.046]; p=1.000
+  - Polarella A25 E25 - Polarella A25 E45: 0.003 [-0.045, 0.050]; p=1.000
+  - Polarella A25 E25 - Chryso A45 E45: 0.017 [-0.033, 0.066]; p=0.906
+  - Polarella A25 E25 - Polarella A45 E45: 0.022 [-0.023, 0.068]; p=0.625
+  - Chryso A45 E25 - Polarella A45 E25: 0.030 [-0.031, 0.091]; p=0.645
+  - Chryso A45 E25 - Chryso A25 E45: -0.035 [-0.081, 0.010]; p=0.168
+  - Chryso A45 E25 - Polarella A25 E45: -0.033 [-0.082, 0.016]; p=0.300
+  - Chryso A45 E25 - Chryso A45 E45: -0.019 [-0.067, 0.028]; p=0.591
+  - Chryso A45 E25 - Polarella A45 E45: -0.014 [-0.059, 0.032]; p=0.936
+  - Polarella A45 E25 - Chryso A25 E45: -0.065 [-0.126, -0.004]; p=0.033
+  - Polarella A45 E25 - Polarella A25 E45: -0.063 [-0.128, 0.002]; p=0.058
+  - Polarella A45 E25 - Chryso A45 E45: -0.049 [-0.114, 0.016]; p=0.197
+  - Polarella A45 E25 - Polarella A45 E45: -0.044 [-0.107, 0.019]; p=0.193
+  - Chryso A25 E45 - Polarella A25 E45: 0.002 [-0.047, 0.052]; p=1.000
+  - Chryso A25 E45 - Chryso A45 E45: 0.016 [-0.033, 0.065]; p=0.916
+  - Chryso A25 E45 - Polarella A45 E45: 0.022 [-0.024, 0.067]; p=0.644
+  - Polarella A25 E45 - Chryso A45 E45: 0.014 [-0.039, 0.067]; p=0.974
+  - Polarella A25 E45 - Polarella A45 E45: 0.019 [-0.030, 0.069]; p=0.822
+  - Chryso A45 E45 - Polarella A45 E45: 0.005 [-0.044, 0.055]; p=1.000
+
+
+==== PHYSIOLOGY (t0→t24 deltas; exposure only at t24) ====
+Each t24 branch (E25/E45) is paired to its own bottle's t0 baseline; deltas are modeled with the same S×A×E fixed-effects structure as other endpoints.
+
+
+## Physiology Δ: Mean cell size
+-------------------------------
+Paired t0→t24 analysis on deltas (Δ = t24 − t0).
+Model: Δ ~ species × sal_adapt × sal_exp + (1|bottle); exposure only at t24.
+Diagnostics (auto, no plots):
+Diagnostics for: Physiology Δ: Mean cell size (Δ @ t24; paired to t0)
+  n(resid)=21; Shapiro p=0.00738; skew=1.19; kurt=3.29
+  Heteroskedasticity — Levene p=0.587; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.224
+  Outliers — |std resid|>3: 1; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.007
+  - Homoskedasticity (Levene across S×A×E): p = 0.587
+Assumptions flagged (α=0.05): Normality (p=0.007)
+Changes made:
+  - Normality flagged; retained scale (Δ allows negatives).
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=0.026; sal_adapt: p=0.115; sal_exp: p=0.102
+  - species:sal_adapt: p=0.013; species:sal_exp: p=0.027; sal_adapt:sal_exp: p=0.356
+  - species:sal_adapt:sal_exp: p=0.125
+Model R² (selected fit) — marginal=0.585, conditional=0.670
+Post-hoc (E within species × acclimation):
+  - E25 - E45: -0.015 [-2.328, 2.298]; p=0.988
+  - E25 - E45: -0.727 [-3.040, 1.587]; p=0.473
+  - E25 - E45: 0.621 [-2.213, 3.454]; p=0.613
+  - E25 - E45: -3.285 [-5.911, -0.659]; p=0.021
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.183 [-2.129, 2.495]; p=0.867
+  - Chryso - Polarella: 4.943 [2.358, 7.528]; p=0.001
+  - Chryso - Polarella: -0.529 [-2.841, 1.783]; p=0.628
+  - Chryso - Polarella: 1.037 [-1.849, 3.924]; p=0.451
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: -0.901 [-3.486, 1.684]; p=0.464
+  - A25 - A45: 3.859 [1.548, 6.171]; p=0.003
+  - A25 - A45: -0.265 [-2.850, 2.320]; p=0.828
+  - A25 - A45: 1.301 [-1.344, 3.947]; p=0.307
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.183 [-3.647, 4.013]; p=1.000
+  - Chryso A25 E25 - Chryso A45 E25: -0.901 [-5.183, 3.381]; p=0.993
+  - Chryso A25 E25 - Polarella A45 E25: 4.042 [0.212, 7.872]; p=0.036
+  - Chryso A25 E25 - Chryso A25 E45: -0.015 [-4.096, 4.066]; p=1.000
+  - Chryso A25 E25 - Polarella A25 E45: -0.544 [-4.374, 3.286]; p=0.999
+  - Chryso A25 E25 - Chryso A45 E45: -0.280 [-4.562, 4.002]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: 0.757 [-3.617, 5.132]; p=0.998
+  - Polarella A25 E25 - Chryso A45 E25: -1.084 [-5.365, 3.198]; p=0.979
+  - Polarella A25 E25 - Polarella A45 E25: 3.859 [0.030, 7.689]; p=0.048
+  - Polarella A25 E25 - Chryso A25 E45: -0.198 [-4.028, 3.632]; p=1.000
+  - Polarella A25 E25 - Polarella A25 E45: -0.727 [-4.808, 3.354]; p=0.990
+  - Polarella A25 E25 - Chryso A45 E45: -0.463 [-4.745, 3.819]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E45: 0.575 [-3.800, 4.950]; p=1.000
+  - Chryso A45 E25 - Polarella A45 E25: 4.943 [0.661, 9.225]; p=0.020
+  - Chryso A45 E25 - Chryso A25 E45: 0.886 [-3.396, 5.168]; p=0.993
+  - Chryso A45 E25 - Polarella A25 E45: 0.357 [-3.925, 4.639]; p=1.000
+  - Chryso A45 E25 - Chryso A45 E45: 0.621 [-4.377, 5.619]; p=0.999
+  - Chryso A45 E25 - Polarella A45 E45: 1.658 [-3.117, 6.433]; p=0.904
+  - Polarella A45 E25 - Chryso A25 E45: -4.057 [-7.887, -0.227]; p=0.035
+  - Polarella A45 E25 - Polarella A25 E45: -4.586 [-8.416, -0.756]; p=0.015
+  - Polarella A45 E25 - Chryso A45 E45: -4.322 [-8.604, -0.040]; p=0.047
+  - Polarella A45 E25 - Polarella A45 E45: -3.285 [-7.823, 1.253]; p=0.194
+  - Chryso A25 E45 - Polarella A25 E45: -0.529 [-4.359, 3.301]; p=0.999
+  - Chryso A25 E45 - Chryso A45 E45: -0.265 [-4.547, 4.017]; p=1.000
+  - Chryso A25 E45 - Polarella A45 E45: 0.772 [-3.602, 5.147]; p=0.998
+  - Polarella A25 E45 - Chryso A45 E45: 0.264 [-4.018, 4.546]; p=1.000
+  - Polarella A25 E45 - Polarella A45 E45: 1.301 [-3.074, 5.676]; p=0.954
+  - Chryso A45 E45 - Polarella A45 E45: 1.037 [-3.738, 5.813]; p=0.992
+
+
+## Physiology Δ: Cell density
+-----------------------------
+Paired t0→t24 analysis on deltas (Δ = t24 − t0).
+Model: Δ ~ species × sal_adapt × sal_exp + (1|bottle); exposure only at t24.
+Diagnostics (auto, no plots):
+Diagnostics for: Physiology Δ: Cell density (Δ @ t24; paired to t0)
+  n(resid)=21; Shapiro p=0.996; skew=0.30; kurt=-0.50
+  Heteroskedasticity — Levene p=0.616; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.625
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.996
+  - Homoskedasticity (Levene across S×A×E): p = 0.616
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=0.255; sal_adapt: p=0.802; sal_exp: p=0.840
+  - species:sal_adapt: p=0.209; species:sal_exp: p=0.380; sal_adapt:sal_exp: p=0.267
+  - species:sal_adapt:sal_exp: p=0.154
+Model R² (selected fit) — marginal=0.258, conditional=0.424
+Post-hoc: skipped (no omnibus terms significant at α=0.05).
+
+
+## Physiology Δ: Yield (Fv/Fm)
+------------------------------
+Paired t0→t24 analysis on deltas (Δ = t24 − t0).
+Model: Δ ~ species × sal_adapt × sal_exp + (1|bottle); exposure only at t24.
+Diagnostics (auto, no plots):
+Diagnostics for: Physiology Δ: Yield (Fv/Fm) (Δ @ t24; paired to t0)
+  n(resid)=21; Shapiro p=0.651; skew=-0.48; kurt=-0.42
+  Heteroskedasticity — Levene p=0.686; ncvTest(BP) (lm only); Spearman(|res|,fitted) p=0.72
+  Outliers — |std resid|>3: 0; Cook's (lm only)
+Assumption checks:
+  - Normality (Shapiro–Wilk on residuals): p = 0.651
+  - Homoskedasticity (Levene across S×A×E): p = 0.686
+Assumptions flagged (α=0.05): none.
+Changes made: none.
+Inference engine: lmer (random-intercept)
+Type-III ANOVA (on inference engine above):
+  - species: p=0.964; sal_adapt: p=0.701; sal_exp: p=0.346
+  - species:sal_adapt: p=0.251; species:sal_exp: p=0.034; sal_adapt:sal_exp: p=0.083
+  - species:sal_adapt:sal_exp: p=0.330
+Model R² (selected fit) — marginal=0.231, conditional=0.777
+Post-hoc (E within species × acclimation):
+  - E25 - E45: 0.025 [-0.003, 0.054]; p=0.074
+  - E25 - E45: -0.015 [-0.044, 0.014]; p=0.249
+  - E25 - E45: -0.010 [-0.045, 0.025]; p=0.513
+  - E25 - E45: -0.025 [-0.059, 0.009]; p=0.129
+Post-hoc (Species within acclimation × exposure):
+  - Chryso - Polarella: 0.003 [-0.046, 0.053]; p=0.882
+  - Chryso - Polarella: 0.026 [-0.030, 0.081]; p=0.320
+  - Chryso - Polarella: -0.037 [-0.086, 0.012]; p=0.124
+  - Chryso - Polarella: 0.011 [-0.047, 0.068]; p=0.685
+Post-hoc (Acclimation within species × exposure):
+  - A25 - A45: 0.006 [-0.049, 0.061]; p=0.811
+  - A25 - A45: 0.028 [-0.021, 0.078]; p=0.226
+  - A25 - A45: -0.029 [-0.085, 0.026]; p=0.260
+  - A25 - A45: 0.018 [-0.033, 0.070]; p=0.448
+Post-hoc (All 3-way cell means; Tukey):
+  - Chryso A25 E25 - Polarella A25 E25: 0.003 [-0.080, 0.087]; p=1.000
+  - Chryso A25 E25 - Chryso A45 E25: 0.006 [-0.088, 0.100]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E25: 0.032 [-0.052, 0.115]; p=0.814
+  - Chryso A25 E25 - Chryso A25 E45: 0.025 [-0.025, 0.076]; p=0.473
+  - Chryso A25 E25 - Polarella A25 E45: -0.012 [-0.095, 0.072]; p=0.999
+  - Chryso A25 E25 - Chryso A45 E45: -0.004 [-0.098, 0.090]; p=1.000
+  - Chryso A25 E25 - Polarella A45 E45: 0.007 [-0.080, 0.094]; p=1.000
+  - Polarella A25 E25 - Chryso A45 E25: 0.003 [-0.091, 0.096]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E25: 0.028 [-0.055, 0.112]; p=0.879
+  - Polarella A25 E25 - Chryso A25 E45: 0.022 [-0.062, 0.106]; p=0.961
+  - Polarella A25 E25 - Polarella A25 E45: -0.015 [-0.066, 0.036]; p=0.880
+  - Polarella A25 E25 - Chryso A45 E45: -0.007 [-0.101, 0.086]; p=1.000
+  - Polarella A25 E25 - Polarella A45 E45: 0.003 [-0.083, 0.090]; p=1.000
+  - Chryso A45 E25 - Polarella A45 E25: 0.026 [-0.068, 0.119]; p=0.952
+  - Chryso A45 E25 - Chryso A25 E45: 0.019 [-0.074, 0.113]; p=0.989
+  - Chryso A45 E25 - Polarella A25 E45: -0.018 [-0.111, 0.076]; p=0.994
+  - Chryso A45 E25 - Chryso A45 E45: -0.010 [-0.072, 0.052]; p=0.994
+  - Chryso A45 E25 - Polarella A45 E45: 0.001 [-0.096, 0.097]; p=1.000
+  - Polarella A45 E25 - Chryso A25 E45: -0.006 [-0.090, 0.077]; p=1.000
+  - Polarella A45 E25 - Polarella A25 E45: -0.043 [-0.127, 0.040]; p=0.535
+  - Polarella A45 E25 - Chryso A45 E45: -0.036 [-0.129, 0.058]; p=0.809
+  - Polarella A45 E25 - Polarella A45 E45: -0.025 [-0.085, 0.035]; p=0.673
+  - Chryso A25 E45 - Polarella A25 E45: -0.037 [-0.121, 0.047]; p=0.691
+  - Chryso A25 E45 - Chryso A45 E45: -0.029 [-0.123, 0.064]; p=0.912
+  - Chryso A25 E45 - Polarella A45 E45: -0.019 [-0.105, 0.068]; p=0.989
+  - Polarella A25 E45 - Chryso A45 E45: 0.008 [-0.086, 0.101]; p=1.000
+  - Polarella A25 E45 - Polarella A45 E45: 0.018 [-0.068, 0.105]; p=0.990
+  - Chryso A45 E45 - Polarella A45 E45: 0.011 [-0.086, 0.107]; p=1.000
+
