@@ -4,8 +4,6 @@
 # ============================================================
 set.seed(42) #this is the first comment
 
-setwd("C:/Users/fmura/Documents/groningen/Hon Project Arctic Algae/Data/R/csvs_for_chat")
-
 quick_diag <- function(fit, data = NULL, grp = NULL, label = NULL) {
   is_lmer <- inherits(fit, "merMod")
   res <- tryCatch(residuals(fit, type = if (is_lmer) "pearson" else "response"),
@@ -80,7 +78,20 @@ hdr <- function(txt){ c("", paste0("## ", txt), strrep("-", nchar(txt)+3)) }
 chr <- read_csv("clean_chr.csv", show_col_types = FALSE)
 pol <- tryCatch(read_csv("clean_pol_modified.csv", show_col_types = FALSE),
                 error = function(e) read_csv("clean_pol.csv", show_col_types = FALSE))
-setwd("C:/Users/fmura/Desktop/DMSP_Osmotic_Shock")
+
+# chryso
+chr <- read_csv(file.path("data", "processed", "clean_chr.csv"),
+                show_col_types = FALSE)
+
+# pol (try clean_pol_modified first, else clean_pol)
+pol <- tryCatch(
+  read_csv(file.path("data", "processed", "clean_pol_modified.csv"),
+           show_col_types = FALSE),
+  error = function(e) read_csv(file.path("data", "processed", "clean_pol.csv"),
+                               show_col_types = FALSE)
+)
+
+
 dat_all <- bind_rows(chr, pol) %>%
   mutate(
     time_num = suppressWarnings(as.integer(as.character(time))),
