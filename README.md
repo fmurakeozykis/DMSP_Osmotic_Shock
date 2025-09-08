@@ -1,4 +1,5 @@
-# DMSP_Osmotic_Shock
+# Bsc Biology Year 3 Honours Research Project II: Effect of osmotic stress on the uptake,
+production and exudation of climate-active compound DMSP by sea-ice algae
 
 Honours Project (Advanced Y3). Single-script analysis of osmotic shock effects on DMSP cycling in Arctic algae. Computes t0→t24 physiology deltas, fits mixed models (Type-III), runs *emmeans* contrasts (Holm), and exports publication-ready tables/figures.
 
@@ -17,7 +18,7 @@ This repository contains a single R script that analyzes physiology changes from
 
 ---
 
-## What the script does (at a glance)
+## What the script does 
 
 1. **Loads data** from two CSV files (`clean_chr.csv`, `clean_pol_modified.csv` or `clean_pol.csv`).
 2. **Harmonizes factors** (`species`, `sal_adapt`→A25/A45, `sal_exp`→E25/E45, `repl`) and standardizes `time` to **t0/t24**.
